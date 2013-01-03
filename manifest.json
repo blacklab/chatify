@@ -1,0 +1,43 @@
+{
+	"AppDescription": {
+		"en": "A messenger to chat about music"
+	},
+	"AppIcon": {
+		"36x18": "tutorial.png"
+	},
+	"AppName": {
+		"en": "Chatify"
+	},
+	"BundleIdentifier": "chatify",
+	"BundleType": "Application",
+	"BundleVersion": "0.1",
+	"DefaultTabs": [
+		{
+			"arguments": "home_tab",
+			"title": {
+				"en": "Home"
+			}
+		},
+		{
+			"arguments": "preferences_tab",
+			"title": {
+				"en": "Preferences"
+			}
+		}
+	],
+	"Dependencies": {
+		"api": "0.1.0",
+		"util": "0.1.0",
+		"resources": "0.1.0"
+	},
+	"RequiredInterface": 1,
+	"RequiredPermissons": [
+		"http://ec2-54-246-45-111.eu-west-1.compute.amazonaws.com",
+		"ec2-54-246-45-111.eu-west-1.compute.amazonaws.com",
+		"http://ec2-54-246-45-111.eu-west-1.compute.amazonaws.com/http-bind"
+	],
+	"SupportedLanguages": [
+		"en"
+	],
+	"VendorIdentifier": "black.magic.laboratories"
+}
