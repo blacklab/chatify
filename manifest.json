@@ -34,7 +34,8 @@
 	"RequiredPermissons": [
 		"http://ec2-54-246-45-111.eu-west-1.compute.amazonaws.com",
 		"ec2-54-246-45-111.eu-west-1.compute.amazonaws.com",
-		"http://ec2-54-246-45-111.eu-west-1.compute.amazonaws.com/http-bind"
+		"http://ec2-54-246-45-111.eu-west-1.compute.amazonaws.com/http-bind",
+		"ec2-54-246-45-111.eu-west-1.compute.amazonaws.com/http-bind"
 	],
 	"SupportedLanguages": [
 		"en"

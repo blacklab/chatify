@@ -52,8 +52,19 @@ function onMessage(msg) {
     return true;
 }
 
+function myErrorHandler(reqStatus, error)
+{
+    console.log(reqStatus +": " + error);   
+}
+
 $(document).ready(function () {
     connection = new Strophe.Connection(BOSH_SERVICE);
+    connection._hitError = function (reqStatus) {
+        this.errors++;
+        Strophe.warn("request errored, status: " + reqStatus + ", number of errors: " + this.errors);
+        if (this.errors > 4) this._onDisconnectTimeout();
+        myErrorHandler(reqStatus, this.errors);
+    };
 
     // Uncomment the following lines to spy on the wire traffic.
     //connection.rawInput = function (data) { log('RECV: ' + data); };
