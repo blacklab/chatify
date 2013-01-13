@@ -1,34 +1,52 @@
-var App = Ember.Application.create();
-App.Models = {};
-App.Controllers = {};
-App.Controllers.Views = {};
+var App = Ember.Application.create({autoinit: false});
 
-//------------------------------------------------------------------------------
+var spApi = getSpotifyApi();
+var spModels = spApi.require("$api/models");
+var spViews = spApi.require("$api/views");
+
+App.Views = {};
+
+
 //----- Models -----------------------------------------------------------------
 
-App.Models.Message = Ember.Object.extend({
+App.MessageModel = Ember.Object.extend({
     from: null,
     to: null,
     body: null,
     createdAt: null,
-
+    track: [],
+    
     init: function () {
         this.set('createdAt', new Date());
     }
 });
 
-//------------------------------------------------------------------------------
-//----- Controllers ------------------------------------------------------------
 
-App.Controllers.Conversations = Ember.ArrayProxy.create({
+//----- Conversation -----------------------------------------------------------
+App.ConversationController = Ember.ArrayProxy.extend({
     content: [],
     
     onMessage: function(message){
+        
+        //Find all track links in message body
+        var regexp = /spotify:track:[A-Za-z0-9]{22}/g;
+        var track_uris = regexp.exec(message.body);
+        
+        message.tracks = [];
+        _.each(track_uris, function(uri){
+            message.tracks.push(new spModels.Track.fromURI(uri));
+        });
+
         this.pushObject(message);
     }
 });
 
-App.ApplicationController = Ember.ObjectController.extend({
+App.ConversationView = Ember.View.extend({
+    templateName: 'conversation'
+});
+
+//----- Application ------------------------------------------------------------
+App.ApplicationController = Ember.Controller.extend({
     debug: true,
 
     //Constructor
@@ -53,7 +71,7 @@ App.ApplicationController = Ember.ObjectController.extend({
     
     //Private callbacks
     _onMessage: function (event, message) {
-        App.Controllers.Conversations.onMessage(message);
+        App.router.get('conversationController').onMessage(message);
     },
     
     //Public functions
@@ -62,28 +80,81 @@ App.ApplicationController = Ember.ObjectController.extend({
     }
 });
 
+App.ApplicationView = Ember.View.extend({
+    templateName: 'application',
+});
+
+//----- Player -----------------------------------------------------------------
+/*
+App.PlayerController = Ember.ObjectController.extend({
+    track1: null,
+    track2: null,
+    playlist: null,
+    
+    init: function(){
+        console.log("Create PlayerController");
+        this._super();
+        
+        this.set('track1', 
+                 new spModels.Track.fromURI('spotify:track:0blzOIMnSXUKDsVSHpZtWL'));
+                 
+        this.set('track2',
+                 new spModels.Track.fromURI('spotify:track:6zJms3MX11Qu1IKF44LoRW'));
+        
+        var playlist = new spModels.Playlist();
+        playlist.add(this.get('track1'));
+        playlist.add(this.get('track2'));
+        
+        this.set('playlist', playlist);
+    },
+
+    play: function(){
+        spModels.player.play(this.track2, this.playlist, 1);
+    }
+});*/
+
+App.PlayerListView = Ember.View.extend({
+    templateName: "player",
+    list: null, //Spotify Playlist View
+    
+    //this should be in a controller
+    playlist: null,
+    
+    init : function(){
+        this._super();
+        
+        //the following should be in a controller
+        var playlist = new spModels.Playlist();
+        _.each(this.get('tracks'), function(track){
+            playlist.add(track);
+        });
+        
+        this.set('playlist', playlist);
+    },
+    
+    didInsertElement: function(){
+        this.set('list', new spViews.List(this.get('playlist')));
+        $(this.get('element')).append(this.get('list').node); 
+    }
+});
+
 //------------------------------------------------------------------------------
 //----- Views ------------------------------------------------------------------
 
-App.ApplicationView = Ember.View.extend({
-  templateName: 'application',
-});
-
-App.ClickableView = Ember.View.extend({
+App.Views.ClickableView = Ember.View.extend({
   attributeBindings: ['href'],
   href: "#",
-  templateName: 'click',
   
   click: function(evt) {
-    dummy_message = App.Models.Message.create({from: "Roman", 
-                                               to: "Karsten",
-                                               body: "Yeah man!"});
+    dummy_message = App.MessageModel.create({from: "Roman", 
+                                             to: "Karsten",
+                                             body: "Yeah man! spotify:track:6zJms3MX11Qu1IKF44LoRW"});
                                                
-    App.Controllers.Conversations.onMessage(dummy_message);
+    App.router.get('conversationController').onMessage(dummy_message);
   }
 });
 
-App.Controllers.Views.MessageTextArea = Ember.TextArea.extend({
+App.Views.MessageTextArea = Ember.TextArea.extend({
    classNames: ["message-text-area"],
    
     keyDown: function (event) {
@@ -91,7 +162,7 @@ App.Controllers.Views.MessageTextArea = Ember.TextArea.extend({
             if (event.which === 13 && !event.shiftKey) {
                 event.preventDefault();
     
-                message = App.Models.Message.create({
+                message = App.MessageModel.create({
                     from: "admin@ec2-54-246-45-111.eu-west-1.compute.amazonaws.com",
                     to: "karsten@ec2-54-246-45-111.eu-west-1.compute.amazonaws.com",
                     body: this.get('value'),
@@ -104,17 +175,26 @@ App.Controllers.Views.MessageTextArea = Ember.TextArea.extend({
                 App.router.applicationController.sendMessage(message);
                         
                 //Display message because it won't be sent back                                   
-                App.Controllers.Conversations.onMessage(message);  
+                App.router.get('conversationController').onMessage(message);  
             }
         }
 });
 
 App.Router = Ember.Router.extend({
-  root: Ember.Route.extend({
-    index: Ember.Route.extend({
-      route: '/'
+    enableLogging: true,
+    root: Ember.Route.extend({
+        index: Ember.Route.extend({
+          route: '/',
+          connectOutlets: function(router){
+            router.get('applicationController')
+                  .connectOutlet({
+                    outletName: 'conversation',
+                    name: 'conversation',
+                    context: []
+                  });
+          }
+        })
     })
-  })
 })
 
 App.initialize();

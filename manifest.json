@@ -31,7 +31,7 @@
 		"resources": "0.1.0"
 	},
 	"RequiredInterface": 1,
-	"RequiredPermissons": [
+	"RequiredPermissions": [
 		"http://ec2-54-246-45-111.eu-west-1.compute.amazonaws.com",
 		"ec2-54-246-45-111.eu-west-1.compute.amazonaws.com",
 		"http://ec2-54-246-45-111.eu-west-1.compute.amazonaws.com/http-bind",

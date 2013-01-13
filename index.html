@@ -15,6 +15,13 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   
   <!-- Le styles -->
+  
+  <!-- Spotify CSS files -->
+  <link rel="stylesheet" type="text/css" href="sp://resources/css/eve.css">
+  <link rel="stylesheet" type="text/css" href="sp://resources/css/api.css">
+  <link rel="stylesheet" type="text/css" href="sp://resources/css/player.css">
+  <link rel="stylesheet" type="text/css" href="sp://resources/css/list.css">
+  
   <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Maven+Pro:400,500' type='text/css'>
   <link rel="stylesheet" href="css/style.css?v=2">
   <link rel="stylesheet" href="css/bootstrap.css">
@@ -59,30 +66,43 @@
   <!--[if lt IE 9]>
   <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
+  
+  <!-- templates -->
+  <script type="text/x-handlebars" data-template-name="conversation">
+	  {{#each message in controller}}
+	    <h4>{{message.from}} to {{message.to}}</h4>
+	    <p>{{message.body}}</p>
+	    {{view App.PlayerListView tracksBinding="message.tracks"}}
+	  {{/each}}
+  </script>
+  
+  <script type="text/x-handlebars" data-template-name="player">
+  </script>
+  
 </head>
 <body>
   <script type="text/x-handlebars" data-template-name="application">
-    <div class="container-narrow">
+    <div class="container-fluid">
 
-      <div class="row-fluid marketing">
-        <div class="span8">
-          {{#each App.Controllers.Conversations}}
-            <h4>{{from}} to {{to}}</h4>
-            <p>{{body}}</p>
-          {{/each}}
+      <div class="row-fluid">
+        <div class="span9">
+  	      
+  	      {{outlet conversation}}
           
           <hr>
           
-          {{view App.Controllers.Views.MessageTextArea}}
+          {{view App.Views.MessageTextArea}}
+          
+          <div id="playlist"></div>
           
         </div>
 
-        <div class="span4">
+        <div class="span3">
           <ul class="nav nav-list">
-              <li class="nav-header">Contacts</li>
-              <li><a href="#">Home</a></li>
+              <li class="nav-header">Home</li>
+              <li><a href="#">Roman</a></li>
               <li class="divider"></li>
-              <li>{{#view App.ClickableView tagName="a"}}Add Message{{/view}}</li>
+              <li>{{#view App.Views.ClickableView tagName="a"}}Add Message{{/view}}</li>
            </ul>
         </div>
       </div>
@@ -105,7 +125,7 @@
   <script src="js/libs/underscore-min.js"></script>
   <script src="js/libs/strophe-1.0.2.js"></script>
   <script src="js/libs/handlebars-1.0.0.beta.6.js"></script>
-  <script src="js/libs/ember-1.0.0-pre.2.min.js"></script>
+  <script src="js/libs/ember-1.0.0-pre.2.js"></script>
   
   <!-- App related -->
   <script src="js/client.js"></script>

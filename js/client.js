@@ -116,6 +116,7 @@ IM.Client.prototype._onMessage = function (stanza) {
         message = {
             id: stanza.attr('id'),
             from: fullJid,
+            to: 'Admin',
             body: body,
             activity: activity
         };
