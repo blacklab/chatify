@@ -59,7 +59,7 @@
         -moz-box-sizing: border-box;    /* Firefox, other Gecko */
         box-sizing: border-box;         /* Opera/IE 8+ */   
         width: 100%; 
-        height: 10em;      
+        height: 5em;      
       }
   </style>
 
@@ -70,14 +70,22 @@
   <!-- templates -->
   <script type="text/x-handlebars" data-template-name="conversation">
 	  {{#each message in controller}}
-	    <h4>{{message.from}} to {{message.to}}</h4>
-	    <p>{{message.body}}</p>
-	    {{view App.PlayerListView tracksBinding="message.tracks"}}
+	    <div class="well well-small">
+            <blockquote {{bindAttr class="message.direction::pull-right"}}>
+                <p>{{message.body}}</p>
+                <small>{{message.from}}</small>
+            </blockquote>
+            {{view App.PlayerListView tracksBinding="message.tracks"}}
+	    </div>
 	  {{/each}}
   </script>
   
   <script type="text/x-handlebars" data-template-name="player">
   </script>
+  
+  <script type="text/x-handlebars" data-template-name="login-button">
+    <button type="button" class="btn">Re-Login</button>
+  </script>   
   
 </head>
 <body>
@@ -102,8 +110,17 @@
               <li class="nav-header">Home</li>
               <li><a href="#">Roman</a></li>
               <li class="divider"></li>
-              <li>{{#view App.Views.ClickableView tagName="a"}}Add Message{{/view}}</li>
+              <li>
+                <form>
+                    {{view Ember.TextField valueBinding="App.user.jid"}}
+                    {{view Ember.TextField valueBinding="App.user.password" type="password"}}
+                    {{view Ember.TextField valueBinding="App.user.friendJid"}}
+                    {{view App.Views.LoginButtonView}}
+                </form>  
+              </li>
            </ul>
+           
+
         </div>
       </div>
 

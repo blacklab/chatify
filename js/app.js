@@ -30,7 +30,7 @@ App.ConversationController = Ember.ArrayProxy.extend({
         
         //Find all track links in message body
         var regexp = /spotify:track:[A-Za-z0-9]{22}/g;
-        var track_uris = regexp.exec(message.body);
+        var track_uris = message.body.match(regexp);
         
         message.tracks = [];
         _.each(track_uris, function(uri){
@@ -46,6 +46,14 @@ App.ConversationView = Ember.View.extend({
 });
 
 //----- Application ------------------------------------------------------------
+
+//TODO move this
+App.user = Ember.Object.create({
+    jid: 'karsten@ec2-54-246-45-111.eu-west-1.compute.amazonaws.com',
+    password: 'chatify',
+    friendJid: 'roman@ec2-54-246-45-111.eu-west-1.compute.amazonaws.com'
+});
+
 App.ApplicationController = Ember.Controller.extend({
     debug: true,
 
@@ -60,8 +68,8 @@ App.ApplicationController = Ember.Controller.extend({
         
         // XMPP client
         this.client = new IM.Client({
-            jid: 'admin@ec2-54-246-45-111.eu-west-1.compute.amazonaws.com',
-            password: 'w1nkada',
+            jid: App.user.jid,
+            password: App.user.password,
             host: 'http://ec2-54-246-45-111.eu-west-1.compute.amazonaws.com/http-bind',
             debug: this.debug
         });
@@ -134,6 +142,7 @@ App.PlayerListView = Ember.View.extend({
     
     didInsertElement: function(){
         this.set('list', new spViews.List(this.get('playlist')));
+        this.get('list').node.classList.add('sp-light');
         $(this.get('element')).append(this.get('list').node); 
     }
 });
@@ -141,19 +150,16 @@ App.PlayerListView = Ember.View.extend({
 //------------------------------------------------------------------------------
 //----- Views ------------------------------------------------------------------
 
-App.Views.ClickableView = Ember.View.extend({
-  attributeBindings: ['href'],
-  href: "#",
-  
-  click: function(evt) {
-    dummy_message = App.MessageModel.create({from: "Roman", 
-                                             to: "Karsten",
-                                             body: "Yeah man! spotify:track:6zJms3MX11Qu1IKF44LoRW"});
-                                               
-    App.router.get('conversationController').onMessage(dummy_message);
-  }
-});
+//Login button view
+App.Views.LoginButtonView = Ember.View.extend({
+    templateName: "login-button",
+    
+    click: function(event){
+        console.log("JID: " + App.user.jid + ", Password: " + App.user.password);
+    }
+})
 
+//TextArea View to send messages 
 App.Views.MessageTextArea = Ember.TextArea.extend({
    classNames: ["message-text-area"],
    
@@ -163,8 +169,8 @@ App.Views.MessageTextArea = Ember.TextArea.extend({
                 event.preventDefault();
     
                 message = App.MessageModel.create({
-                    from: "admin@ec2-54-246-45-111.eu-west-1.compute.amazonaws.com",
-                    to: "karsten@ec2-54-246-45-111.eu-west-1.compute.amazonaws.com",
+                    from: App.user.jid,
+                    to: App.user.friendJid,
                     body: this.get('value'),
                     fromName: "Admin",
                     direction: 'outgoing'});
