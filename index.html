@@ -25,6 +25,7 @@
   <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Maven+Pro:400,500' type='text/css'>
   <link rel="stylesheet" href="css/style.css?v=2">
   <link rel="stylesheet" href="css/bootstrap.css">
+  <!--<link rel="stylesheet" href="css/font-awesome.min.css"> @font-face is disabled-->
   <style type="text/css">
       body {
         padding-top: 20px;
@@ -69,65 +70,101 @@
   
   <!-- templates -->
   <script type="text/x-handlebars" data-template-name="conversation">
-	  {{#each message in controller}}
-	    <div class="well well-small">
-            <blockquote {{bindAttr class="message.direction::pull-right"}}>
-                <p>{{message.body}}</p>
-                <small>{{message.from}}</small>
-            </blockquote>
-            {{view App.PlayerListView tracksBinding="message.tracks"}}
-	    </div>
-	  {{/each}}
+	  <div class="row-fluid">
+        <div class="span9">
+    	  {{#each message in controller}}
+    	    <div class="well well-small">
+                <blockquote {{bindAttr class="message.direction::pull-right"}}>
+                    <p>{{message.body}}</p>
+                    <small>{{message.from}}</small>
+                </blockquote>
+                {{view App.PlayerListView tracksBinding="message.tracks"}}
+    	    </div>
+    	  {{/each}}
+          <hr>
+              
+          {{view App.Views.MessageTextArea}}
+
+        </div>
+        
+        <div class="span3">
+            {{outlet roster}}
+        </div>
+     </div>
+  </script>
+  
+  <script type="text/x-handlebars" data-template-name="roster">
+      <ul class="nav nav-list">
+        <li class="nav-header">Friends</li>
+        {{#each friend in controller}}
+            <li>{{#if friend.online}}<i class="icon-fire"></i>{{/if}} <a>{{friend.name}}</a></li>
+        {{/each}}
+      </ul>
   </script>
   
   <script type="text/x-handlebars" data-template-name="player">
   </script>
   
-  <script type="text/x-handlebars" data-template-name="login-button">
-    <button type="button" class="btn">Re-Login</button>
-  </script>   
+  <script type="text/x-handlebars" data-template-name="login">
+      <div class="span6 offset3">
+        {{outlet}}
+      </div> 
+  </script> 
+  
+  <script type="text/x-handlebars" data-template-name="login/index">
+    <form class="form-horizontal">
+            <div class="control-group">
+                <label class="control-label">JID</label>
+                <div class="controls">
+                    {{view Ember.TextField class="input-xlarge" valueBinding="App.user.jid"}}
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">Password</label>
+                <div class="controls">
+                    {{view Ember.TextField class="input-xlarge" valueBinding="App.user.password" type="password"}}
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="inputEmail">Friend's JID</label>
+                <div class="controls">
+                    {{view Ember.TextField class="input-xlarge" valueBinding="App.user.friendJid"}}
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="controls">
+                    <button {{action "login"}} class="btn">Login</button>
+                </div>
+            </div>
+        </form>
+  </script>  
+  
+  <script type="text/x-handlebars" data-template-name="login/connect">
+    <div style="text-align:center;">Connecting...</div>
+    {{#if error}}
+    <div class="alert alert-error">{{error}}</div>
+    <div class="pull-right">
+        <button {{action "backToLogin"}} class="btn">Back to Login</button>
+    </div>
+    
+    {{/if}}
+  </script>
   
 </head>
 <body>
   <script type="text/x-handlebars" data-template-name="application">
     <div class="container-fluid">
-
+        
       <div class="row-fluid">
-        <div class="span9">
-  	      
-  	      {{outlet conversation}}
-          
-          <hr>
-          
-          {{view App.Views.MessageTextArea}}
-          
-          <div id="playlist"></div>
-          
-        </div>
-
-        <div class="span3">
-          <ul class="nav nav-list">
-              <li class="nav-header">Home</li>
-              <li><a href="#">Roman</a></li>
-              <li class="divider"></li>
-              <li>
-                <form>
-                    {{view Ember.TextField valueBinding="App.user.jid"}}
-                    {{view Ember.TextField valueBinding="App.user.password" type="password"}}
-                    {{view Ember.TextField valueBinding="App.user.friendJid"}}
-                    {{view App.Views.LoginButtonView}}
-                </form>  
-              </li>
-           </ul>
-           
-
-        </div>
+          {{outlet}}
       </div>
-
-      <hr>
+      
+      <hr />
 
       <div class="footer">
         <p>&copy; Black Magic Laboratories 2013</p>
+        <p><small><a href="http://glyphicons.com">Glyphicons Free</a> licensed under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</small></p>
       </div>
 
     </div> <!-- /container -->
@@ -141,8 +178,8 @@
   <script src="js/libs/jquery.ba-tinypubsub.js"></script>
   <script src="js/libs/underscore-min.js"></script>
   <script src="js/libs/strophe-1.0.2.js"></script>
-  <script src="js/libs/handlebars-1.0.0.beta.6.js"></script>
-  <script src="js/libs/ember-1.0.0-pre.2.js"></script>
+  <script src="js/libs/handlebars-1.0.0-rc.3.js"></script>
+  <script src="js/libs/ember-1.0.0-rc.1.js"></script>
   
   <!-- App related -->
   <script src="js/client.js"></script>
