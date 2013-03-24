@@ -26,16 +26,17 @@
 		}
 	],
 	"Dependencies": {
-		"api": "0.1.0",
-		"util": "0.1.0",
-		"resources": "0.1.0"
+		"api": "0.2.3",
+        "util": "0.1.0",
+        "resources": "0.2.2"
 	},
 	"RequiredInterface": 1,
 	"RequiredPermissions": [
-		"http://ec2-54-246-45-111.eu-west-1.compute.amazonaws.com",
-		"ec2-54-246-45-111.eu-west-1.compute.amazonaws.com",
-		"http://ec2-54-246-45-111.eu-west-1.compute.amazonaws.com/http-bind",
-		"ec2-54-246-45-111.eu-west-1.compute.amazonaws.com/http-bind"
+		"http://ec2-46-51-139-70.eu-west-1.compute.amazonaws.com",
+		"ec2-46-51-139-70.eu-west-1.compute.amazonaws.com",
+		"http://ec2-46-51-139-70.eu-west-1.compute.amazonaws.com/http-bind",
+		"ec2-46-51-139-70.eu-west-1.compute.amazonaws.com/http-bind",
+		"http://localhost"
 	],
 	"SupportedLanguages": [
 		"en"

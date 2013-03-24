@@ -201,6 +201,12 @@ IM.Client.prototype.connect = function () {
     return this;
 };
 
+IM.Client.prototype.disconnect = function () {
+    this.connection.flush();
+    this.connection.disconnect();
+    $.publish('disconnected.client.im');
+};
+
 IM.Client.prototype.send = function (stanza) {
     this.connection.send(stanza);
 };

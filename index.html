@@ -62,6 +62,10 @@
         width: 100%; 
         height: 5em;      
       }
+      
+      .ember-view .active  {
+        color: red;
+      }
   </style>
 
   <!--[if lt IE 9]>
@@ -69,25 +73,39 @@
   <![endif]-->
   
   <!-- templates -->
-  <script type="text/x-handlebars" data-template-name="conversation">
-	  <div class="row-fluid">
+
+<script type="text/x-handlebars" data-template-name="conversations/index">
+      <div class="row-fluid">
         <div class="span9">
-    	  {{#each message in controller}}
-    	    <div class="well well-small">
-                <blockquote {{bindAttr class="message.direction::pull-right"}}>
-                    <p>{{message.body}}</p>
-                    <small>{{message.from}}</small>
-                </blockquote>
-                {{view App.PlayerListView tracksBinding="message.tracks"}}
-    	    </div>
-    	  {{/each}}
-          <hr>
-              
-          {{view App.Views.MessageTextArea}}
+
+          <p>You have no conversation selected</p>
 
         </div>
         
         <div class="span3">
+            <p class="pull-right">{{#linkTo login.disconnect}}Logout{{/linkTo}}</p>
+            {{outlet roster}}
+        </div>
+     </div>
+</script>
+  
+  <script type="text/x-handlebars" data-template-name="conversations/conversation">
+
+      <div class="row-fluid">
+        <div class="span9">
+
+          <p>Talking to {{controller.conversation.name}}</p>
+  
+          <hr>
+
+          {{view App.Views.MessageTextArea}}
+
+          <button {{action "addMessage"}} class="btn">Add Message</button>
+
+        </div>
+        
+        <div class="span3">
+            <p class="pull-right">{{#linkTo login.disconnect}}Logout{{/linkTo}}</p>
             {{outlet roster}}
         </div>
      </div>
@@ -96,8 +114,18 @@
   <script type="text/x-handlebars" data-template-name="roster">
       <ul class="nav nav-list">
         <li class="nav-header">Friends</li>
-        {{#each friend in controller}}
+        {{#unless loadedRoster}}
+            <li>Loading...</li>
+        {{else}}
+            {{#each friend in controller}}
             <li>{{#if friend.online}}<i class="icon-fire"></i>{{/if}} <a>{{friend.name}}</a></li>
+            {{/each}}
+        {{/unless}}
+    </ul>
+    <ul class="nav nav-list">
+        <li class="nav-header">Conversations</li>
+        {{#each c in controller.conversations}}
+        <li>{{#linkTo conversations/conversation c}}{{c.name}} {{c.id}}{{/linkTo}}</li>
         {{/each}}
       </ul>
   </script>
@@ -134,7 +162,7 @@
 
             <div class="control-group">
                 <div class="controls">
-                    <button {{action "login"}} class="btn">Login</button>
+                    {{#linkTo login.connect classNames="btn"}}Login{{/linkTo}}
                 </div>
             </div>
         </form>
@@ -149,6 +177,10 @@
     </div>
     
     {{/if}}
+  </script>
+  
+  <script type="text/x-handlebars" data-template-name="login/disconnect">
+    <div style="text-align:center;">Disconnecting...</div>
   </script>
   
 </head>
