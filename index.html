@@ -73,42 +73,35 @@
   <![endif]-->
   
   <!-- templates -->
-
-<script type="text/x-handlebars" data-template-name="conversations/index">
+  
+  <script type="text/x-handlebars" data-template-name="conversations">
       <div class="row-fluid">
         <div class="span9">
 
-          <p>You have no conversation selected</p>
+          {{outlet conversation}}
 
         </div>
         
+        <!-- sidebar -->
         <div class="span3">
             <p class="pull-right">{{#linkTo login.disconnect}}Logout{{/linkTo}}</p>
             {{outlet roster}}
         </div>
      </div>
+ </script>
+
+<script type="text/x-handlebars" data-template-name="conversations/index">
+      <p>You have no conversation selected</p>
 </script>
   
   <script type="text/x-handlebars" data-template-name="conversations/conversation">
-
-      <div class="row-fluid">
-        <div class="span9">
-
-          <p>Talking to {{controller.conversation.name}}</p>
+    <p>Talking to {{controller.conversation.name}}</p>
   
-          <hr>
+    <hr>
 
-          {{view App.Views.MessageTextArea}}
+    {{view App.Views.MessageTextArea}}
 
-          <button {{action "addMessage"}} class="btn">Add Message</button>
-
-        </div>
-        
-        <div class="span3">
-            <p class="pull-right">{{#linkTo login.disconnect}}Logout{{/linkTo}}</p>
-            {{outlet roster}}
-        </div>
-     </div>
+    <button {{action "addMessage"}} class="btn">Add Message</button>
   </script>
   
   <script type="text/x-handlebars" data-template-name="roster">

@@ -425,7 +425,6 @@ App.Router.map(function(){
         this.route("connect"); 
         this.route("disconnect"); 
     });
-    //this.resource("conversation", {path: "/conversation/:conversation_id"});
     
     this.resource('conversations', { path: '/conversation' }, function() {    // ConversationsRoute - #/conversation
         // ConversationsIndexRoute - #/conversation/
@@ -474,6 +473,19 @@ App.LoginDisconnectRoute = Ember.Route.extend({
    } 
 });
 
+App.ConversationsRoute = Ember.Route.extend({
+
+    renderTemplate: function() {
+        this.render('conversations');
+        
+        this.render('roster', {
+            into: 'conversations',
+            outlet: 'roster',
+            controller: 'roster'
+        });
+    }
+});
+
 // 'conversation/' Conversations/Index
 App.ConversationsIndexRoute = Ember.Route.extend({
     
@@ -486,12 +498,8 @@ App.ConversationsIndexRoute = Ember.Route.extend({
     },
     
     renderTemplate: function() {
-        this.render('conversations/index');
-        
-        this.render('roster', {
-            into: 'conversations/index',
-            outlet: 'roster',
-            controller: 'roster'
+        this.render('conversations/index', {
+            outlet: 'conversation'
         });
     }
 });
@@ -510,12 +518,8 @@ App.ConversationsConversationRoute = Ember.Route.extend({
     },
     
     renderTemplate: function() {
-        this.render('conversations/conversation');
-        
-        this.render('roster', {
-            into: 'conversations/conversation',
-            outlet: 'roster',
-            controller: 'roster'
+        this.render('conversations/conversation', {
+            outlet: "conversation"
         });
     }
 });
