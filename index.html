@@ -35,7 +35,7 @@
       /* Custom container */
       .container-narrow {
         margin: 0 auto;
-        max-width: 700px;
+        max-width: 900px;
       }
       .container-narrow > hr {
         margin: 30px 0;
@@ -95,8 +95,12 @@
 </script>
   
   <script type="text/x-handlebars" data-template-name="conversations/conversation">
-    <p>Talking to {{controller.conversation.name}}</p>
-  
+    <p>Talking to {{controller.talkingPartner.name}}</p>
+
+    {{#each message in controller.messages}}
+        {{message.body}}
+    {{/each}}
+
     <hr>
 
     {{view App.Views.MessageTextArea}}
@@ -111,7 +115,10 @@
             <li>Loading...</li>
         {{else}}
             {{#each friend in controller}}
-            <li>{{#if friend.online}}<i class="icon-fire"></i>{{/if}} <a>{{friend.name}}</a></li>
+            <li>
+                {{#if friend.online}}<i class="icon-fire"></i>{{/if}} 
+                {{#linkTo conversations/conversation friend}}{{friend.name}}{{/linkTo}}
+            </li>
             {{/each}}
         {{/unless}}
     </ul>
@@ -179,7 +186,7 @@
 </head>
 <body>
   <script type="text/x-handlebars" data-template-name="application">
-    <div class="container-fluid">
+    <div class="container-narrow">
         
       <div class="row-fluid">
           {{outlet}}

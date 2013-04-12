@@ -53,6 +53,10 @@ App.UserModel = Ember.Object.extend({
         var jid = this.get('jid');
         return jid ? Strophe.getNodeFromJid(jid) : jid;
     }.property('jid').cacheable(),
+
+    id: function(){
+        return this.get('jid');
+    }.property('jid').cacheable(),
     
     presence: function () {
         return this.get('resources').length ? 'available' : 'unavailable';
@@ -90,53 +94,55 @@ App.UserModel = Ember.Object.extend({
 
 
 //----- Conversation -----------------------------------------------------------
-App.ConversationsIndexController = Ember.ArrayController.extend({});
 
-App.ConversationsConversationsController = Ember.ArrayProxy.extend({
-    content: [],
-    
-    conversation: null,
-    
-    init: function() {
-        // Bindings for XMPP client events
-        $.subscribe('message.client.im', this._onMessage); 
+//Model
 
-        var msg = App.MessageModel.create({
-            from: "karsten",
-            to: "roman",
-            body: "hello",
-            direction: 'outgoing',
-            id: 1
-        });
-        
-        console.log("ConversationIndex.Content:" + this.get('content'));
-        
-        this.set('content', [msg]);
-    },
+App.Conversation = Ember.Object.extend({
+    messages: [],
+    talkingPartner: null,
     
-    addMessage: function() {
-        var message =  App.MessageModel.create({
-            from: "roman",
-            to: "karsten",
-            body: "Na, wie geht's?",
-        });
-        this.pushObject(message);
-        
+    init: function(){
+        this._super();
+
+        console.log("Init called for App.Conversation");
+
+        //Binding for XMPP client event
+        $.subscribe('message.client.im', _.bind(this._onMessage, this));
     },
-    
+
     //Private Callbacks
     _onMessage: function(event, message){
+
+        console.log("Received message");
+                    
         //Find all track links in message body
         var regexp = /spotify:track:[A-Za-z0-9]{22}/g;
         var track_uris = message.body.match(regexp);
-        
+        /*
         message.tracks = [];
         _.each(track_uris, function(uri){
             message.tracks.push(new spModels.Track.fromURI(uri));
-        });
+        });*/
 
-        this.pushObject(message);
+        this.find(message.jid).messages.pushObject(message);
     }
+});
+
+App.Conversation = Ember.Object.reopenClass({
+
+    store: {},
+
+    find: function(id){
+        if(!this.store[id]){
+            this.store[id] = App.Conversation.create();
+        }
+        return this.store[id];
+    }
+});
+
+App.ConversationsIndexController = Ember.ArrayController.extend({});
+
+App.ConversationsConversationController = Ember.ObjectController.extend({
 });
 
 //----- Roster -----------------------------------------------------------------
@@ -157,6 +163,7 @@ App.RosterController = Ember.ArrayProxy.extend({
                     ],
     
     init: function(){
+        this._super();
         // Bindings for XMPP client events
         $.subscribe('roster.client.im', _.bind(this._onRoster, this));
         //$.subscribe('rosterChange.client.im', _.bind(this._onRosterChange, this));
@@ -238,6 +245,7 @@ App.LoginIndexController = Ember.ObjectController.extend({
    //needs: ['application', 'loginConnect'],
    
    init: function() {
+     this._super();
      this.set('loggedIn', false);  
    },
    
@@ -256,6 +264,7 @@ App.LoginConnectController = Ember.ObjectController.extend({
     //loginIndexBinding: "controllers.loginIndex",
     
     init: function(){
+        this._super();
         this.set('error', null);
         
         $.subscribe('connected.client.im', _.bind(this._onConnected, this));  
@@ -293,6 +302,7 @@ App.LoginDisconnectController = Ember.ObjectController.extend({
     //loginIndexBinding: "controllers.loginIndex",
     
     init: function(){
+        this._super();
         $.subscribe('diconnected.client.im', _.bind(this._onDisconnected, this));  
     },
 
@@ -322,7 +332,7 @@ App.ApplicationController = Ember.Controller.extend({
 
     //Constructor
     init : function(){
-
+        this._super();
     },
 
     //Public functions
@@ -425,11 +435,13 @@ App.Router.map(function(){
         this.route("connect"); 
         this.route("disconnect"); 
     });
-    
-    this.resource('conversations', { path: '/conversation' }, function() {    // ConversationsRoute - #/conversation
+
+    // ConversationsRoute - #/conversation
+    this.resource('conversations', { path: '/conversation' }, function() {            
         // ConversationsIndexRoute - #/conversation/
-        this.route('conversation', { path: '/:conversation_id' }); // ConversationsConversationRoute - #/conversation/<conversation_id_here>
-    });
+
+        // ConversationsConversationRoute - #/conversation/<conversation_id_here>
+        this.route('conversation', { path: '/:conversation_id' });    });
 });
 
 App.IndexRoute = Ember.Route.extend({
@@ -504,6 +516,13 @@ App.ConversationsIndexRoute = Ember.Route.extend({
     }
 });
 
+App.TestObject = Ember.Object.extend({
+    init: function(){
+        console.log("init called on test object");
+        this._super();
+    },
+});
+
 // 'conversation/:conversation_id' Conversations/Conversation
 App.ConversationsConversationRoute = Ember.Route.extend({
     
@@ -514,7 +533,23 @@ App.ConversationsConversationRoute = Ember.Route.extend({
     },
     
     setupController: function(controller, model) {
-      controller.set("conversation", model);
+
+        var msg = App.MessageModel.create({
+            from: "karsten",
+            to: "roman",
+            body: "hello",
+            direction: 'outgoing',
+            id: 1
+        });
+
+        //model is of type user. Find conversation...
+        App.TestObject.create();
+        App.TestObject.create();
+        conv = App.Conversation.find(model.get('id'));
+        conv.set('talkingPartner', model);
+        conv.set('messages', [msg]);
+                         
+        controller.set("content", conv);
     },
     
     renderTemplate: function() {
