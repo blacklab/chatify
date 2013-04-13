@@ -75,8 +75,7 @@
   <!-- templates -->
   
   <script type="text/x-handlebars" data-template-name="conversations">
-      <div class="row-fluid">
-        <div class="span9">
+        <div class="span9" style="margin-left: 0;">
 
           {{outlet conversation}}
 
@@ -84,10 +83,11 @@
         
         <!-- sidebar -->
         <div class="span3">
+            <div class="well" style="padding: 9px">
             <p class="pull-right">{{#linkTo login.disconnect}}Logout{{/linkTo}}</p>
             {{outlet roster}}
         </div>
-     </div>
+        </div>
  </script>
 
 <script type="text/x-handlebars" data-template-name="conversations/index">
@@ -95,10 +95,23 @@
 </script>
   
   <script type="text/x-handlebars" data-template-name="conversations/conversation">
-    <p>Talking to {{controller.talkingPartner.name}}</p>
-
+    
     {{#each message in controller.messages}}
-        {{message.body}}
+    <div class="well">
+        <p>From: {{message.from}}</p>
+        <p>To: {{message.to}}</p>
+        <p>{{message.body}}</p>
+        <p>
+            {{#each track_uri in message.tracks}}
+                <iframe src="https://embed.spotify.com/?uri={{track_uri}}" 
+                    width="630" 
+                    height="80" 
+                    frameborder="0" 
+                    allowtransparency="true">
+                </iframe>
+           {{/each}}
+        </p>
+    </div>
     {{/each}}
 
     <hr>
@@ -114,20 +127,15 @@
         {{#unless loadedRoster}}
             <li>Loading...</li>
         {{else}}
-            {{#each friend in controller}}
+            {{#each friend in controller.content.friends}}
             <li>
-                {{#if friend.online}}<i class="icon-fire"></i>{{/if}} 
-                {{#linkTo conversations/conversation friend}}{{friend.name}}{{/linkTo}}
+            {{#linkTo conversations/conversation friend}}
+                {{#if friend.online}}<i class="icon-fire"></i>{{/if}} {{friend.name}}
+            {{/linkTo}}     
             </li>
             {{/each}}
         {{/unless}}
     </ul>
-    <ul class="nav nav-list">
-        <li class="nav-header">Conversations</li>
-        {{#each c in controller.conversations}}
-        <li>{{#linkTo conversations/conversation c}}{{c.name}} {{c.id}}{{/linkTo}}</li>
-        {{/each}}
-      </ul>
   </script>
   
   <script type="text/x-handlebars" data-template-name="player">
@@ -186,9 +194,9 @@
 </head>
 <body>
   <script type="text/x-handlebars" data-template-name="application">
-    <div class="container-narrow">
+    <div class="container-fluid" style="margin: 0 auto; max-width: 900px;">
         
-      <div class="row-fluid">
+      <div class="row-fluid" >
           {{outlet}}
       </div>
       
@@ -214,7 +222,19 @@
   <script src="js/libs/ember-1.0.0-rc.1.js"></script>
   
   <!-- App related -->
+  <script>
+      
+    //Just create Ember App for testing
+    var App = Ember.Application.create({
+        autoinit: false,
+        LOG_TRANSITIONS: true
+    });
+
+  </script>
   <script src="js/client.js"></script>
+  <script src="js/models/user.js"></script>
+  <script src="js/models/conversation.js"></script>
+  <script src="js/models/roster.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

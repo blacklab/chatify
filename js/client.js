@@ -135,15 +135,17 @@ IM.Client.prototype._onPresenceChange = function (stanza) {
 IM.Client.prototype._onMessage = function (stanza) {
     stanza = $(stanza);
 
+    console.log("_onMessage in IM.Client");
+
     var fullJid = stanza.attr('from'),
         bareJid = Strophe.getBareJidFromJid(fullJid),
-        body = stanza.find('body').text(),
+        body = stanza.children('body').text();
         // TODO: fetch activity
         activity = 'active',
         message = {
             id: stanza.attr('id'),
             from: fullJid,
-            to: 'Admin',
+            to: stanza.attr('to'),
             body: body,
             activity: activity
         };

@@ -1,13 +1,9 @@
-
+/* Is defined in index now
 var App = Ember.Application.create({
     autoinit: false,
     LOG_TRANSITIONS: true
 });
-/*
-var spApi = getSpotifyApi();
-var spModels = spApi.require("$api/models");
-var spViews = spApi.require("$api/views");*/
-
+*/
 App.Views = {};
 
 //Basic config
@@ -93,145 +89,28 @@ App.UserModel = Ember.Object.extend({
 });
 
 
-//----- Conversation -----------------------------------------------------------
-
-//Model
-
-App.Conversation = Ember.Object.extend({
-    messages: [],
-    talkingPartner: null,
-    
-    init: function(){
-        this._super();
-
-        console.log("Init called for App.Conversation");
-
-        //Binding for XMPP client event
-        $.subscribe('message.client.im', _.bind(this._onMessage, this));
-    },
-
-    //Private Callbacks
-    _onMessage: function(event, message){
-
-        console.log("Received message");
-                    
-        //Find all track links in message body
-        var regexp = /spotify:track:[A-Za-z0-9]{22}/g;
-        var track_uris = message.body.match(regexp);
-        /*
-        message.tracks = [];
-        _.each(track_uris, function(uri){
-            message.tracks.push(new spModels.Track.fromURI(uri));
-        });*/
-
-        this.find(message.jid).messages.pushObject(message);
-    }
-});
-
-App.Conversation = Ember.Object.reopenClass({
-
-    store: {},
-
-    find: function(id){
-        if(!this.store[id]){
-            this.store[id] = App.Conversation.create();
-        }
-        return this.store[id];
-    }
-});
-
-App.ConversationsIndexController = Ember.ArrayController.extend({});
-
-App.ConversationsConversationController = Ember.ObjectController.extend({
-});
 
 //----- Roster -----------------------------------------------------------------
-App.RosterController = Ember.ArrayProxy.extend({
+App.RosterController = Ember.ObjectController.extend({
     content: null,
-    
-    conversations: [
-                    {
-                        name: "Roman",
-                        id: "b.15"
-                      }, {
-                        name: "Julika",
-                        id: "b.133"
-                      }, {
-                        name: "Romina",
-                        id: "b.126"
-                      }
-                    ],
     
     init: function(){
         this._super();
-        // Bindings for XMPP client events
-        $.subscribe('roster.client.im', _.bind(this._onRoster, this));
-        //$.subscribe('rosterChange.client.im', _.bind(this._onRosterChange, this));
-        
-        $.subscribe('presence.client.im', _.bind(this._onPresenceChange, this));
-    },
-    
-    setFriendPresence: function (presence) {
-        var fullJid = presence.from,
-            bareJid = Strophe.getBareJidFromJid(fullJid),
-            friend = this.findProperty('jid', bareJid);
-
-        if (friend) {
-            friend.setPresence(presence);
-        } else {
-            // Something went wrong. 
-            // Got presence notification from user not in the roster.
-            console.warn('Presence update from user not in the roster: ' + fullJid + ':' + presence.type);
-        }
     },
     
     //Property: returns true when roster was loaded.
     loadedRoster: function(){
-        return this.get('content') == null;
-    }.property('loadedRoster'),
-    
-    //Private Callbacks
-    _onRoster: function (event, friends) {
-        console.log("onRoster");
-        
-        var objects = _.map(friends, function (friend) {
-            return App.UserModel.create(friend);
+        return !(this.get('content').get('friends') == null);
+    }.property('content.friends'),
+
+    all: function(){
+        var friends = [];
+        this.get('content').get('store').forEach(function(key, value){
+            friends.addObject(value);
         });
-
-        this.set('content', objects);
-    },
+        return friends;
+    }.property('content.store')
     
-    _onPresenceChange: function (event, presence) {
-        var fullJid = presence.from,
-            bareJid = Strophe.getBareJidFromJid(fullJid);
-
-        switch (presence.type) {
-        case 'error':
-            // do something
-            break;
-        case 'subscribe':
-            // authorization request
-            break;
-        case 'unsubscribe':
-            // deauthorization request
-            break;
-        case 'subscribed':
-            // authorization confirmed
-            break;
-        case 'unsubscribed':
-            // deauthorization confirmed
-            break;
-        default:
-            // Update user's or friend's presence status
-            if (App.user.get('jid') === bareJid) {
-                //TODO: set own presence
-                console.log("TODO: set own presence");
-                //this.setUserPresence(presence);
-            } else {
-                this.setFriendPresence(presence);
-            }
-        }
-    },
 });
 
 App.RosterView = Ember.View.extend({
@@ -454,6 +333,13 @@ App.IndexRoute = Ember.Route.extend({
         
     }
 });
+
+App.RosterRoute = Ember.Route.extend({
+    model: function(){
+        console.log("RosterRoute.model called");
+        return [];
+    }
+});
     
 App.LoginRoute = Ember.Route.extend({
     activate : function() {
@@ -487,6 +373,18 @@ App.LoginDisconnectRoute = Ember.Route.extend({
 
 App.ConversationsRoute = Ember.Route.extend({
 
+    setupController: function(controller, model){
+        console.log("Setup controller in ConversationsRoute");
+
+        var roster = App.Roster.create();
+        //TODO: this might have to move somewhere else
+        roster._subscribe();
+        this.controllerFor('roster')
+            .set('content', roster);
+
+        console.log("Found controller");
+    },
+
     renderTemplate: function() {
         this.render('conversations');
         
@@ -516,39 +414,20 @@ App.ConversationsIndexRoute = Ember.Route.extend({
     }
 });
 
-App.TestObject = Ember.Object.extend({
-    init: function(){
-        console.log("init called on test object");
-        this._super();
-    },
-});
-
 // 'conversation/:conversation_id' Conversations/Conversation
 App.ConversationsConversationRoute = Ember.Route.extend({
     
     model: function(params){
         console.log("Parameters: " + params);
-        
-        return {id: params.conversation_id, name: "hi"};
+    
+        //TODO: retrieve/create model
+        return null;
     },
     
     setupController: function(controller, model) {
 
-        var msg = App.MessageModel.create({
-            from: "karsten",
-            to: "roman",
-            body: "hello",
-            direction: 'outgoing',
-            id: 1
-        });
-
         //model is of type user. Find conversation...
-        App.TestObject.create();
-        App.TestObject.create();
         conv = App.Conversation.find(model.get('id'));
-        conv.set('talkingPartner', model);
-        conv.set('messages', [msg]);
-                         
         controller.set("content", conv);
     },
     
@@ -558,5 +437,9 @@ App.ConversationsConversationRoute = Ember.Route.extend({
         });
     }
 });
+
+//init XMPPBindings
+//TODO: move this to a nicer place
+App.Conversation.subscribe();
 
 App.initialize();
