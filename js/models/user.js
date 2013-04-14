@@ -2,6 +2,12 @@
 //----- User ------------------------------------------------------------------
 
 //Model
+App.Resource = Ember.Object.extend({
+    // Default attribute values
+    show: null,
+    status: null
+});
+
 App.User = Ember.Object.extend({
     // Default attribute values
     jid: null,
@@ -19,8 +25,8 @@ App.User = Ember.Object.extend({
         return jid ? Strophe.getNodeFromJid(jid) : jid;
     }.property('jid').cacheable(),
 
-    id: function(){
-        return this.get('jid');
+    id: function() {
+        return Strophe.getBareJidFromJid(this.get('jid'));
     }.property('jid').cacheable(),
     
     presence: function () {
@@ -40,11 +46,10 @@ App.User = Ember.Object.extend({
             resources.removeObject(resource);
         } else {
             if (resource) {
-                // TODO: set both properties at once?
-                resource.set('show', presence.show);
-                resource.set('status', presence.status);
+                resource.setProperties({show: presence.show,
+                                        status: presence.status});
             } else {
-                resource = App.ResourceModel.create({
+                resource = App.Resource.create({
                     id: id,
                     show: presence.show,
                     status: presence.status

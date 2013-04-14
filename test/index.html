@@ -28,6 +28,11 @@
         LOG_TRANSITIONS: true
     });
 
+    //TODO move this
+    App.user = Ember.Object.create({
+        jid: 'self@karsten-n',
+        password: 'chatify',
+    });
   </script>
   <script src="/js/models/user.js"></script>
   <script src="/js/models/conversation.js"></script>
@@ -36,5 +41,6 @@
   <!-- Load tests -->
   <script src="/test/unit/conversation.js"></script>
   <script src="/test/unit/roster.js"></script>
+  <script src="/test/unit/user.js"></script>
 </body>
 </html>

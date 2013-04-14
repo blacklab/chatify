@@ -22,7 +22,7 @@ App.Roster = Ember.Object.extend({
             $.subscribe('roster.client.im', _.bind(this._onRoster, this));
             //$.subscribe('rosterChange.client.im', _.bind(this._onRosterChange, this));
         
-            //$.subscribe('presence.client.im', _.bind(this._onPresenceChange, this));
+            $.subscribe('presence.client.im', _.bind(this._onPresenceChange, this));
             
             this.set('subscribed',true);
         }
@@ -33,10 +33,10 @@ App.Roster = Ember.Object.extend({
         console.log("Find is called for roster");
     },
     
-    setFriendPresence: function (presence) {
+    _setFriendPresence: function (presence) {
         var fullJid = presence.from,
             bareJid = Strophe.getBareJidFromJid(fullJid),
-            friend = this.get('store')[bareJid];
+            friend = this.get('friends').findProperty('jid', bareJid);
 
         if (friend) {
             friend.setPresence(presence);
@@ -54,7 +54,8 @@ App.Roster = Ember.Object.extend({
 
         var objects = Em.A();
         _.map(friends, function (friend) {
-            bare_jid = Strophe.getBareJidFromJid(friend.jid);
+            bareJid = Strophe.getBareJidFromJid(friend.jid);
+            friend.jid = bareJid
             objects.push(App.User.create(friend));
         });
 
@@ -88,7 +89,7 @@ App.Roster = Ember.Object.extend({
                 console.log("TODO: set own presence");
                 //this.setUserPresence(presence);
             } else {
-                this.setFriendPresence(presence);
+                this._setFriendPresence(presence);
             }
         }
     },
