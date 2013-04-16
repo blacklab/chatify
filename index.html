@@ -22,7 +22,9 @@
   <link rel="stylesheet" type="text/css" href="sp://resources/css/player.css">
   <link rel="stylesheet" type="text/css" href="sp://resources/css/list.css">
   
-  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Maven+Pro:400,500' type='text/css'>
+  <link rel='stylesheet'
+        href='http://fonts.googleapis.com/css?family=Maven+Pro:400,500' 
+        type='text/css'>
   <link rel="stylesheet" href="css/style.css?v=2">
   <link rel="stylesheet" href="css/bootstrap.css">
   <!--<link rel="stylesheet" href="css/font-awesome.min.css"> @font-face is disabled-->
@@ -118,7 +120,6 @@
 
     {{view App.Views.MessageTextArea}}
 
-    <button {{action "addMessage"}} class="btn">Add Message</button>
   </script>
   
   <script type="text/x-handlebars" data-template-name="roster">
@@ -159,12 +160,6 @@
                 <label class="control-label">Password</label>
                 <div class="controls">
                     {{view Ember.TextField class="input-xlarge" valueBinding="App.user.password" type="password"}}
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label" for="inputEmail">Friend's JID</label>
-                <div class="controls">
-                    {{view Ember.TextField class="input-xlarge" valueBinding="App.user.friendJid"}}
                 </div>
             </div>
 

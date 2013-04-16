@@ -20,17 +20,53 @@
   <script src="/js/libs/ember-1.0.0-rc.1.js"></script>
 
   <!-- Load app modules -->
+  <script src="/js/client.js"></script>
   <script>
       
+    //Basic config
+    var CONFIG = {
+                host: "http://localhost:5280/http-bind/"
+            };
+
+    var xmppClient = null;
+
     //Just create Ember App for testing
     var App = Ember.Application.create({
         autoinit: false,
         LOG_TRANSITIONS: true
     });
 
+    App.ApplicationController = Ember.Controller.extend({
+        debug: true,
+        
+        //Constructor
+        init : function(){
+            this._super();
+        },
+
+        //Public functions
+        connectXMPPClient: function() {
+        
+            // XMPP client
+            xmmpClient = new IM.Client({
+                jid: App.user.jid,
+                password: App.user.password,
+                host: CONFIG.host,
+                debug: true
+            });
+        
+            xmppClient.connect(); 
+        },
+    
+        disconnectXMPPClient: function() {
+            xmppClient.disconnect(); 
+        }
+    
+    });
+
     //TODO move this
     App.user = Ember.Object.create({
-        jid: 'self@karsten-n',
+        jid: 'karsten@karsten-n',
         password: 'chatify',
     });
   </script>

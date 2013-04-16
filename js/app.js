@@ -6,26 +6,14 @@ var App = Ember.Application.create({
 */
 App.Views = {};
 
+//Instance of XMPP Client. TODO: Move to different place
+var xmppClient = null;
+
 //Basic config
 var CONFIG = {
-                host: "http://localhost:5280/http-bind/"//'http://ec2-46-51-139-70.eu-west-1.compute.amazonaws.com/http-bind'
+                host: "http://localhost:5280/http-bind/"
+              //host: 'http://ec2-46-51-139-70.eu-west-1.compute.amazonaws.com/http-bind'
              };
-
-
-//----- Models -----------------------------------------------------------------
-
-App.MessageModel = Ember.Object.extend({
-    id: null,
-    from: null,
-    to: null,
-    body: null,
-    createdAt: null,
-    track: [],
-    
-    init: function () {
-        this.set('createdAt', new Date());
-    }
-});
 
 //----- Roster -----------------------------------------------------------------
 App.RosterController = Ember.ObjectController.extend({
@@ -130,13 +118,11 @@ App.LoginDisconnectController = Ember.ObjectController.extend({
 //Is bound in LoginView
 App.user = Ember.Object.create({
     jid: 'karsten@karsten-n',
-    password: 'chatify',
-    friendJid: 'roman@karsten-n'
+    password: 'chatify'
 });
 
 App.ApplicationController = Ember.Controller.extend({
     debug: true,
-    xmppClient: null,
 
     //Constructor
     init : function(){
@@ -147,25 +133,20 @@ App.ApplicationController = Ember.Controller.extend({
     connectXMPPClient: function() {
         
         // XMPP client
-        var tmp_client = new IM.Client({
+        xmppClient = new IM.Client({
             jid: App.user.jid,
             password: App.user.password,
             host: CONFIG.host,
             debug: this.debug
         });
         
-        this.set('xmppClient', tmp_client);
-        
-        this.get('xmppClient').connect(); 
+        xmppClient.connect(); 
     },
     
     disconnectXMPPClient: function() {
-        this.get('xmppClient').disconnect(); 
-    },
-    
-    sendMessage: function (message) {
-        this.client.message(message.get('to'), message.get('body'));
+        xmppClient.disconnect(); 
     }
+    
 });
 
 App.ApplicationView = Ember.View.extend({
@@ -206,27 +187,22 @@ App.PlayerListView = Ember.View.extend({
 
 //TextArea View to send messages 
 App.Views.MessageTextArea = Ember.TextArea.extend({
-   classNames: ["message-text-area"],
+    classNames: ["message-text-area"],
    
     keyDown: function (event) {
             // Send message when Enter key is pressed
             if (event.which === 13 && !event.shiftKey) {
                 event.preventDefault();
     
-                message = App.MessageModel.create({
-                    from: App.user.jid,
-                    to: App.user.friendJid,
-                    body: this.get('value'),
-                    fromName: "Admin",
-                    direction: 'outgoing'});
+                var message = {body: this.get('value'), from: App.user.jid};
                                                            
                 this.set('value', '');
            
                 //Send message
-                App.router.applicationController.sendMessage(message);
-                        
-                //Display message because it won't be sent back                                   
-                App.router.get('conversationController').onMessage(message);  
+                var ctrl = this.get('controller');
+                console.log("Pressed enter:", ctrl);
+                ctrl.sendChat(message);
+                //App.router.applicationController.sendMessage(message);
             }
         }
 });
