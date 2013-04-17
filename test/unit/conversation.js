@@ -23,12 +23,14 @@ test("2 Test if App.Converstion.find adds to store.", function(){
 });
 
 test("3 Test _onMessage callback for receiving messages", function(){
+    expect(1);
+
     var conv, message;
 
     //The conversation is with roman
     conv = App.Conversation.find("roman@karsten-n");
 
-    //The message is comming from roman
+    //The message is coming from roman
     message = {from: "roman@karsten-n",
                to: "karsten@karsten-n",
                body: "hello world with track: spotify:track:4EBisBBehGON4ESJsNZBsP"
@@ -55,7 +57,7 @@ test("4 Test subscribe and tinypubsub", function(){
     //The conversation is with roman
     conv = App.Conversation.find("roman@karsten-n");
     
-    //The message is comming from roman
+    //The message is coming from roman
     message = {from: "roman@karsten-n",
                to: "karsten@karsten-n",
                body: "via pubsub"
@@ -84,7 +86,7 @@ test("4 Test subscribe and tinypubsub", function(){
 
 test("5 Test sending a message", function(){
     expect(2);
-
+/*
     var conv, message;
 
     //The conversation is with roman
@@ -132,7 +134,44 @@ test("5 Test sending a message", function(){
         debug: true
     });
     xmppClient.connect(); 
-
+*/
 
     ok(false, "Test not added yet.");
+});
+
+module("App.ConversationsConversation Controller");
+
+test("1 Test getting all track URIs from a conversation", function(){
+    expect(1);
+    
+    var conv, ctrl, message, tracks_result;
+
+    //The conversation is with roman
+    ctrl = App.ConversationsConversationController.create();
+    conv = App.Conversation.find("roman@karsten-n");
+    ctrl.set('content', conv);
+
+    //Add another message with some more tracks.
+    message = {from: "roman@karsten-n",
+               to: "karsten@karsten-n",
+               body: "hello world with track: " +
+                     "spotify:track:4EBisBBehGON4ESJsNZBsP" +
+                     "spotify:track:2N5QlNGFTbLRbeECevlsgu"
+              };
+
+    App.Conversation._onMessage(null, message);
+
+    tracks_result = ctrl.get('allTracks');
+
+    deepEqual(tracks_result,
+              ["spotify:track:4EBisBBehGON4ESJsNZBsP",
+               "spotify:track:2N5QlNGFTbLRbeECevlsgu"
+              ],
+              "We expect two Spotify URIs.");
+});
+
+module("App.PlaylistView");
+
+test("1 List tracks", function(){
+    ok(false, "No test added.");
 });

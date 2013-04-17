@@ -95,9 +95,25 @@
 <script type="text/x-handlebars" data-template-name="conversations/index">
       <p>You have no conversation selected</p>
 </script>
+
+<script type="text/x-handlebars" data-template-name="playlist">
+
+    <div style="position: fixed; left: 10px;">
+        {{log controller}}
+        {{#each uri in controller.allTracks}}
+            {{uri}}
+        {{/each}}
+        <iframe src="https://embed.spotify.com/?uri=spotify:trackset:PREFEREDTITLE:5Z7ygHQo02SUrFmcgpwsKW,1x6ACsKV4UdWS2FMuPFUiT,4bi73jCM02fMpkI11Lqmfe" 
+            frameborder="0" 
+            allowtransparency="true"
+            height="800"></iframe>
+    </div>
+  </script>
   
   <script type="text/x-handlebars" data-template-name="conversations/conversation">
-    
+
+      {{view App.PlaylistView}}
+
     {{#each message in controller.messages}}
     <div class="well">
         <p>From: {{message.from}}</p>
@@ -118,7 +134,7 @@
 
     <hr>
 
-    {{view App.Views.MessageTextArea}}
+    {{view App.MessageTextAreaView}}
 
   </script>
   
@@ -138,10 +154,7 @@
         {{/unless}}
     </ul>
   </script>
-  
-  <script type="text/x-handlebars" data-template-name="player">
-  </script>
-  
+
   <script type="text/x-handlebars" data-template-name="login">
       <div class="span6 offset3">
         {{outlet}}
@@ -230,6 +243,11 @@
   <script src="js/models/user.js"></script>
   <script src="js/models/conversation.js"></script>
   <script src="js/models/roster.js"></script>
+
+  <script src="js/controllers/conversation.js"></script>
+  
+  <script src="js/views/playlist.js"></script>
+  
   <script src="js/app.js"></script>
 </body>
 </html>

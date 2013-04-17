@@ -4,7 +4,6 @@ var App = Ember.Application.create({
     LOG_TRANSITIONS: true
 });
 */
-App.Views = {};
 
 //Instance of XMPP Client. TODO: Move to different place
 var xmppClient = null;
@@ -153,40 +152,11 @@ App.ApplicationView = Ember.View.extend({
     templateName: 'application',
 });
 
-//----- Player -----------------------------------------------------------------
-App.PlayerListView = Ember.View.extend({
-    templateName: "player",
-    list: null, //Spotify Playlist View
-    
-    //this should be in a controller
-    playlist: null,
-    
-    init : function(){
-        this._super();
-        
-        /*
-        //the following should be in a controller
-        var playlist = new spModels.Playlist();
-        _.each(this.get('tracks'), function(track){
-            playlist.add(track);
-        });
-        
-        this.set('playlist', playlist);*/
-    },
-    
-    didInsertElement: function(){
-        /*
-        this.set('list', new spViews.List(this.get('playlist')));
-        this.get('list').node.classList.add('sp-light');
-        $(this.get('element')).append(this.get('list').node); */
-    }
-});
-
 //------------------------------------------------------------------------------
 //----- Views ------------------------------------------------------------------
 
 //TextArea View to send messages 
-App.Views.MessageTextArea = Ember.TextArea.extend({
+App.MessageTextAreaView = Ember.TextArea.extend({
     classNames: ["message-text-area"],
    
     keyDown: function (event) {

@@ -16,16 +16,6 @@ App.Message = Ember.Object.extend({
 });
 */
 
-//Controller
-
-App.ConversationsConversationController = Ember.ObjectController.extend({
-
-    sendChat: function(message){
-        //Just proxy
-        this.get('content').sendChat(message);
-    }
-});
-
 //Model
 
 App.Conversation = Ember.Object.extend({
