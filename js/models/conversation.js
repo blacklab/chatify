@@ -25,7 +25,7 @@ App.Conversation = Ember.Object.extend({
 
         console.log("Init called for App.Conversation");
 
-        this.set('messages', []);
+        this.set('messages', Em.A());
     },
 
     /* Adds a message to conversation store and sends it to friend in 
@@ -77,7 +77,7 @@ App.Conversation = App.Conversation.reopenClass({
         var regexp = /spotify:track:[A-Za-z0-9]{22}/g;
         var track_uris = message.body.match(regexp);
     
-        message.tracks = [];
+        message.tracks = Em.A();
         _.each(track_uris, function(uri){
             message.tracks.push(uri);
         });

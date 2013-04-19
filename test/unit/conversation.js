@@ -165,13 +165,8 @@ test("1 Test getting all track URIs from a conversation", function(){
 
     deepEqual(tracks_result,
               ["spotify:track:4EBisBBehGON4ESJsNZBsP",
+              "spotify:track:4EBisBBehGON4ESJsNZBsP",
                "spotify:track:2N5QlNGFTbLRbeECevlsgu"
               ],
               "We expect two Spotify URIs.");
-});
-
-module("App.PlaylistView");
-
-test("1 List tracks", function(){
-    ok(false, "No test added.");
 });

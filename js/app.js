@@ -5,13 +5,27 @@ var App = Ember.Application.create({
 });
 */
 
+//Handlebars.js Helpers
+
+Ember.Handlebars.registerBoundHelper('join', function(items) {
+    return items.join(",");
+});
+
+Ember.Handlebars.registerBoundHelper('uglyplayer', function(items) {
+    var tracks = _.map(items, function(item){ return item.substring(14) }).join(",");
+    return new Handlebars.SafeString(
+          '<iframe src="https://embed.spotify.com/?uri=spotify:trackset:CHATIFY:' +
+          tracks + '"' +
+          'frameborder="0" allowtransparency="true" height="800"></iframe>');
+});
+
 //Instance of XMPP Client. TODO: Move to different place
 var xmppClient = null;
 
 //Basic config
 var CONFIG = {
+              //host: "https://blacklab.taurus.uberspace.de/ejabberd/http-bind"
                 host: "http://localhost:5280/http-bind/"
-              //host: 'http://ec2-46-51-139-70.eu-west-1.compute.amazonaws.com/http-bind'
              };
 
 //----- Roster -----------------------------------------------------------------

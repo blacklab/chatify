@@ -99,20 +99,13 @@
 <script type="text/x-handlebars" data-template-name="playlist">
 
     <div style="position: fixed; left: 10px;">
-        {{log controller}}
-        {{#each uri in controller.allTracks}}
-            {{uri}}
-        {{/each}}
-        <iframe src="https://embed.spotify.com/?uri=spotify:trackset:PREFEREDTITLE:5Z7ygHQo02SUrFmcgpwsKW,1x6ACsKV4UdWS2FMuPFUiT,4bi73jCM02fMpkI11Lqmfe" 
-            frameborder="0" 
-            allowtransparency="true"
-            height="800"></iframe>
+        {{uglyplayer controller.allTracks}}
     </div>
   </script>
   
   <script type="text/x-handlebars" data-template-name="conversations/conversation">
 
-      {{view App.PlaylistView}}
+    {{view App.PlaylistView}}
 
     {{#each message in controller.messages}}
     <div class="well">
