@@ -22,6 +22,7 @@ robocopy .\css\ .\build\css\ *
 robocopy .\img\ .\build\img\ *
 robocopy .\js\libs\ .\build\js\libs\ *
 robocopy .\ .\build\ index.html
+robocopy .\ .\build favicon.ico
 
 echo ------------------------------------
 echo Change Script includes in index.html!

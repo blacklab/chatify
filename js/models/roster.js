@@ -28,10 +28,6 @@ App.Roster = Ember.Object.extend({
         }
 
     },
-
-    find: function(id){
-        console.log("Find is called for roster");
-    },
     
     _setFriendPresence: function (presence) {
         var fullJid = presence.from,
@@ -97,4 +93,7 @@ App.Roster = Ember.Object.extend({
 
 //Static members
 App.Roster = App.Roster.reopenClass({
+    find: function(id){
+        console.log("Find is called for roster");
+    },
 });

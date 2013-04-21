@@ -15,12 +15,13 @@ function onStatus(status){
 
 // constructor
 IM.Client = function (options) {
+/* adapted in EmberXmpp
     this.host = options.host || '/http-bind';
     this.jid = options.jid;
     this.password = options.password;
     this.connection = new Strophe.Connection(this.host);
     this.jids = {};
-
+*/
     // TODO: move into a function
     // monitor all traffic in debug mode
     if (options.debug) {

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,6 +17,7 @@
   <script src="/js/libs/strophe-1.0.2.js"></script>
   <script src="/js/libs/handlebars-1.0.0-rc.3.js"></script>
   <script src="/js/libs/ember-1.0.0-rc.1.js"></script>
+  <script src="/js/libs/xc.js"></script>
 
   <!-- Load app modules -->
   <script src="/js/client.js"></script>
@@ -69,7 +69,13 @@
         jid: 'karsten@karsten-n',
         password: 'chatify',
     });
-  </script>
+</script>
+
+  <!--EmberXmpp Models -->
+  <script src="/js/models/ember-xmpp.connection.js"></script>
+  <script src="/js/models/ember-xmpp.entity.js"></script>
+
+  <!-- Models -->
   <script src="/js/models/user.js"></script>
   <script src="/js/models/conversation.js"></script>
   <script src="/js/models/roster.js"></script>
@@ -81,5 +87,7 @@
   <script src="/test/unit/roster.js"></script>
   <script src="/test/unit/user.js"></script>
   <script src="/test/unit/playlist.js"></script>
+
+  <script src="/test/unit/ember-xmpp.entity.js"></script>
 </body>
 </html>
