@@ -1,9 +1,3 @@
-/* Is defined in index now
-var App = Ember.Application.create({
-    autoinit: false,
-    LOG_TRANSITIONS: true
-});
-*/
 
 //Handlebars.js Helpers
 
@@ -22,11 +16,6 @@ Ember.Handlebars.registerBoundHelper('uglyplayer', function(items) {
 //Instance of XMPP Client. TODO: Move to different place
 var xmppClient = null;
 
-//Basic config
-var CONFIG = {
-              //host: "https://blacklab.taurus.uberspace.de/ejabberd/http-bind"
-                host: "http://localhost:5280/http-bind/"
-             };
 
 //----- Roster -----------------------------------------------------------------
 App.RosterController = Ember.ObjectController.extend({
@@ -39,7 +28,7 @@ App.RosterController = Ember.ObjectController.extend({
     //Property: returns true when roster was loaded.
     loadedRoster: function(){
         return !(this.get('content').get('friends') == null);
-    }.property('content.friends'),
+    }.property('content.friends')
 
 });
 
@@ -131,7 +120,7 @@ App.LoginDisconnectController = Ember.ObjectController.extend({
 //Is bound in LoginView
 App.user = Ember.Object.create({
     jid: 'karsten@karsten-n',
-    password: 'chatify'
+    password: ''
 });
 
 App.ApplicationController = Ember.Controller.extend({
@@ -163,7 +152,7 @@ App.ApplicationController = Ember.Controller.extend({
 });
 
 App.ApplicationView = Ember.View.extend({
-    templateName: 'application',
+    templateName: 'application'
 });
 
 //------------------------------------------------------------------------------

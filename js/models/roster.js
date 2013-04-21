@@ -92,7 +92,7 @@ App.Roster = Ember.Object.extend({
                 this._setFriendPresence(presence);
             }
         }
-    },
+    }
 });
 
 //Static members

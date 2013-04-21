@@ -18,6 +18,6 @@ App.ConversationsConversationController = Ember.ObjectController.extend({
         });
 
         return tracks;
-    }.property('content.messages.@each'),
+    }.property('content.messages.@each')
 });
 
