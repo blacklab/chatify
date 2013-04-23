@@ -13,6 +13,13 @@ Ember.Handlebars.registerBoundHelper('uglyplayer', function(items) {
           'frameborder="0" allowtransparency="true" height="800"></iframe>');
 });
 
+//Filter that converts markdown to html
+Ember.Handlebars.registerBoundHelper('marked', function(markdown){
+    var html = marked(markdown);
+
+    return new Handlebars.SafeString(html);
+});
+
 //Instance of XMPP Client. TODO: Move to different place
 var xmppClient = null;
 
