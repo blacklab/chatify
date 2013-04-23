@@ -8,6 +8,10 @@ EmberXmpp.Entity = Ember.Object.extend({
         this._super();
     },
 
+    jid: function(){
+        return this.get('xcEntity').getBareJID();
+    }.property('xcEntity'),
+
     //TODO: dependency should go down deeper than just xcEntity
     //Node is seen as username/name
     name: function(){
@@ -19,10 +23,27 @@ EmberXmpp.Entity = Ember.Object.extend({
         return null;
     }.property('xcEntity'),
 
-    //TODO: check xcEntity for null
-    online: function(){
-       return this.get('xcEntity').presence.available; 
+    presence: function(key, value){
+        // getter
+        if (arguments.length === 1) {
+            return this.get('xcEntity').presence;
+
+        // setter
+        } else {
+            this.get('xcEntity').presence = value;
+
+            return value;
+        }
     }.property('xcEntity'),
+
+    online: function(){
+       var e = this.get('xcEntity');
+
+       if(e){
+           return this.get('xcEntity').presence.available; 
+       }
+       return null;
+    }.property('presence'),
 
     sendChat: function(body, subject, thread, id){
         this.get('xcEntity').sendChat(body, subject, thread, id);

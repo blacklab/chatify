@@ -23,7 +23,7 @@ EmberXmpp.Connection = Ember.Object.extend({
     },
 
 
-    //TODO: this callback might be on class base not istance. Check it!
+    //TODO: this callback might be on class base not instance. Check it!
     _onConnect: function(status) {
         console.log("Status: " + status);
    
@@ -81,24 +81,29 @@ EmberXmpp.Connection = Ember.Object.extend({
 EmberXmpp.Connection = EmberXmpp.Connection.reopenClass({
     store: {},
 
+    /**
+     * @param {String} host Address to connect to.
+     * @param {JID} jid The jid of the user.
+     */
     create: function(host, jid, password){
-        var connection, bosh, xc;
+        var connection, bosh, xc, roster;
 
+        //Create Ember model
+        connection = EmberXmpp.Connection.create({'jid': jid,
+                                                  'password': password,
+                                                  'host': host});
         //Create a new strophe connection
         bosh = new Strophe.Connection(host);
-        bosh.connect(jid, password, _.bind(connection._onConnect, this));
+        bosh.connect(jid, password, _.bind(connection._onConnect, connection));
         
         //Create an XC instance with a Strophe adapter
         xc = XC.Connection.extend({
             connectionAdapter: XC.StropheAdapter.extend({connection: strophe})
         }); 
 
-        //Create Ember model
-        connection = EmberXmpp.Connection.create({'jid': jid,
-                                                  'password': password,
-                                                  'host': host,
-                                                  'bosh': bosh,
-                                                  'xc': xc});
+        //Set bosh and XC.Connection for EmberXmpp.Connection model
+        connection.set('bosh', bosh);
+        connection.set('xc', xc);
         
         roster = connection.get('roster');
 

@@ -9,11 +9,17 @@ EmberXmpp.Roster = Ember.ArrayProxy.extend({
         this.set('content', Em.A());
     },
 
+    /**
+     * @param {Array of XC.Entity} entites List of friends received.
+     */
     onRosterItems: function(entities){
-        _.each(entities, this.onRosterItem);
+        entities.forEach(this.onRosterItem, this);
     },
 
-    onRosterItem: functioni(entity){
+    /**
+     * @param {XC.Entity} entity A friend which should be added to roster.
+     */
+    onRosterItem: function(entity){
         //Create EmberXmpp.Enttiy from XC.Entity and append
         var e = EmberXmpp.Entity.create({'xcEntity': entity});
 
@@ -21,7 +27,7 @@ EmberXmpp.Roster = Ember.ArrayProxy.extend({
     },
 
     onPresence: function(entity){
-        var contact = this.find('jid', entity.jid);
-        contact.presence = entity.presence;
+        var contact = this.findProperty('jid',entity.jid);
+        contact.set('presence', entity.presence);
     }
-)};
+});
