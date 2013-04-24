@@ -9,11 +9,10 @@ EmberXmpp.Connection = Ember.Object.extend({
     roster: null,
 
     //TODO: should this be global?
-    bosh: null,
     xc: null,
 
     init: function(){
-        this.super();
+        this._super();
 
         this.set('roster', EmberXmpp.Roster.create());
     },
@@ -24,10 +23,17 @@ EmberXmpp.Connection = Ember.Object.extend({
 
 
     //TODO: this callback might be on class base not instance. Check it!
-    _onConnect: function(status) {
+    onConnect: function(status) {
+        var xc = this.get('xc');
         console.log("Status: " + status);
    
         this.set('connectionStatus', status);
+
+        if(status == Strophe.Status.CONNECTED){
+            //Send own presence and request roster once we connected.
+            xc.Presence.send();
+            xc.Roster.requestItems();
+        }
 
         /*
         var Status = Strophe.Status;
@@ -65,15 +71,6 @@ EmberXmpp.Connection = Ember.Object.extend({
 
         return true;*/
     },
-
-    //TODO: this callback might not work on instance base. Check it!
-    _onConnected: function(){
-        var xc = this.get('xc');
-
-        //Send own presence and request roster
-        xc.Presence.send();
-        xc.Roster.requestItems();
-    }
 });
 
 
@@ -82,34 +79,79 @@ EmberXmpp.Connection = EmberXmpp.Connection.reopenClass({
     store: {},
 
     /**
+     * @param {Object} options Should include jid, host and password fields.
+     * @param {function} onConnect Callback for connection. status is passed as
+     *        parameter.
+     */
+    getConnectionAdapter: function(options){
+        var bosh, adapter;
+        
+        //Create a new strophe connection
+        bosh = new Strophe.Connection(options.host);
+       
+        //Create adapter
+        adapter = XC.StropheAdapter.extend({
+            connection: bosh,
+
+            /**
+             * We add a connect function for XC.Connection to call.
+             * TODO: This could be moved some time into XC.
+             * @param {Function} callback A callback for Strope.
+             */
+            connect: function(callback){
+                this.connection.connect(options.jid, 
+                                        options.password, 
+                                        onConnect);
+            }
+        });
+
+        return adapter; 
+    },
+
+    /**
      * @param {String} host Address to connect to.
      * @param {JID} jid The jid of the user.
      */
-    create: function(host, jid, password){
-        var connection, bosh, xc, roster;
+    createConnection: function(host, jid, password){
+        var connection, xc, adapter, roster;
 
         //Create Ember model
         connection = EmberXmpp.Connection.create({'jid': jid,
                                                   'password': password,
                                                   'host': host});
-        //Create a new strophe connection
-        bosh = new Strophe.Connection(host);
-        bosh.connect(jid, password, _.bind(connection._onConnect, connection));
-        
-        //Create an XC instance with a Strophe adapter
-        xc = XC.Connection.extend({
-            connectionAdapter: XC.StropheAdapter.extend({connection: strophe})
-        }); 
 
-        //Set bosh and XC.Connection for EmberXmpp.Connection model
-        connection.set('bosh', bosh);
+        //Create connection adapter
+        adapter = this.getConnectionAdapter({'jid': jid,
+                                             'password': password,
+                                             'host': host
+                                            }
+                                           );
+        
+        //Create an XC.Connection instance with a Strophe adapter
+        xc = XC.Connection.extend({
+                connectionAdapter: adapter,
+
+                /**
+                 * We add a connect function so we can connect after we 
+                 * registered all handlers.
+                 * The adapter needs to be extended as done in 
+                 * getConnectionAdapter
+                 *
+                 * @param {Function} callback This callback is for Strope.
+                 */
+                connect: function(callback){
+                    this.connectionAdapter.connect(callback);
+                }
+             }); 
+
+        //Set and XC.Connection for EmberXmpp.Connection model
         connection.set('xc', xc);
         
-        roster = connection.get('roster');
-
         //Register handlers
+        roster = connection.get('roster');
         xc.Presence.registerHandler('onPresence', 
                                     _.bind(roster.onPresence, roster));
+
         xc.Roster.registerHandler('onRosterItems', 
                                   _.bind(roster.onRosterItems, roster));
 
@@ -117,8 +159,13 @@ EmberXmpp.Connection = EmberXmpp.Connection.reopenClass({
         //var conversation = connection.get('conversation');
         //xc.Chat.registerHandler('onMessage',
         //                        _.bind(conversation.onMessage, conversation));
+        
+        //Finally: connect!
+        xc.connect(_.bind(connection.onConnect, connection));
 
         //Add connection to store
         this.store[jid + "_" + host] = connection;
+
+        return connection;
     }
 });

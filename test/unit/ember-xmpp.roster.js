@@ -59,10 +59,10 @@ test("2 Test onRosterItems callback.", function(){
 
     //convert entitis to EmberXmpp.Entity
     var entityNames = entities.map(function(item){ 
-                                var e = EmberXmpp.Entity
-                                                .create({xcEntity: item});
-                                return e.get('name');
-                               });
+                                     var e = EmberXmpp.Entity
+                                                      .create({xcEntity: item});
+                                     return e.get('name');
+                                   });
 
     deepEqual(roster.map(function(item){ return item.get('name') }),
           entityNames,
