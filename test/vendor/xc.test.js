@@ -14,6 +14,7 @@ XC.Test.MockConnection = XC.ConnectionAdapter.extend({
 
   init: function () {
     this._responses = [];
+    this._data = [];
     this._handlers  = {};
 
     return this;
@@ -40,7 +41,8 @@ XC.Test.MockConnection = XC.ConnectionAdapter.extend({
   },
 
   send: function (xml, callback, args) {
-    this._data = xml;
+    //this._data = xml;
+    this._data.push(xml);
     args = args || [];
     args.unshift(this.nextResponse());
     if (callback) {
@@ -57,7 +59,8 @@ XC.Test.MockConnection = XC.ConnectionAdapter.extend({
   },
 
   getLastStanzaXML: function() {
-    return this._data;
+    //return this._data;
+    return this._data.pop();
   }
 });
 

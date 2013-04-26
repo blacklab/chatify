@@ -21,6 +21,9 @@ EmberXmpp.Connection = Ember.Object.extend({
         return this.get('roster');
     },
 
+    connect: function(){
+        this.get('xc').connect(_.bind(this.onConnect, this));
+    },
 
     //TODO: this callback might be on class base not instance. Check it!
     onConnect: function(status) {
@@ -112,7 +115,7 @@ EmberXmpp.Connection = EmberXmpp.Connection.reopenClass({
      * @param {String} host Address to connect to.
      * @param {JID} jid The jid of the user.
      */
-    createConnection: function(host, jid, password){
+    createRecord: function(jid, host, password){
         var connection, xc, adapter, roster;
 
         //Create Ember model
@@ -161,11 +164,32 @@ EmberXmpp.Connection = EmberXmpp.Connection.reopenClass({
         //                        _.bind(conversation.onMessage, conversation));
         
         //Finally: connect!
-        xc.connect(_.bind(connection.onConnect, connection));
+        //xc.connect(_.bind(connection.onConnect, connection));
 
         //Add connection to store
-        this.store[jid + "_" + host] = connection;
+        //this.store[jid + "_" + host] = connection;
 
         return connection;
+    },
+
+    /**
+     * Looks up the connection which belongs to jid and host. If there is no
+     * connection a new model instance is created.
+     * NOTE: The connection is only established as soon as connect is called!
+     *
+     * @param {String} jid The JID of the user which should be connected.
+     * @param {String} host The host to connect to.
+     *
+     * @retrun A connection corresponding to jid and host
+     */
+    find: function(jid, host, password){
+        var id = jid + "_" + host;
+
+        if(!this.store[id]){
+            this.store[id] = EmberXmpp.Connection.createRecord(jid, 
+                                                               host, 
+                                                               password);
+        }
+        return this.store[id];
     }
 });

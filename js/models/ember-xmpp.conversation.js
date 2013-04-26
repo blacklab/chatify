@@ -20,7 +20,7 @@ EmberXmpp.Conversation = Ember.ArrayProxy.extend({
 
 //Static members
 
-EmberXmpp.Conversation = EmberXmpp.reopenClass({
+EmberXmpp.Conversation = EmberXmpp.Conversation.reopenClass({
     store: {},
 
     find: function(id){
