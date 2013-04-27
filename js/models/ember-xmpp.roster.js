@@ -26,8 +26,17 @@ EmberXmpp.Roster = Ember.ArrayProxy.extend({
         this.get('content').pushObject(e);
     },
 
+    /**
+     * @param {XC.Entity} entity A friend who changed her presence.
+     */
     onPresence: function(entity){
-        var contact = this.findProperty('jid',entity.jid);
-        contact.set('presence', entity.presence);
+        var contact, bareJID;
+
+        bareJID = XC.Entity.extend({jid: entity.jid}).getBareJID();
+        contact = this.findProperty('jid', bareJID);
+
+        if(contact){
+            contact.set('presence', entity.presence);
+        }
     }
 });

@@ -27,7 +27,6 @@ module("EmberXmpp.Connection model static members",{
 test("1 Test EmberXmpp.Connection.createRecord()", function(){
     expect(4); //4th assert is called in adapter. See setup
 
-    adapter.addResponse("");
     adapter.addResponse(XC.Test.Packet.extendWithXML(
       '<iq to="marvin@heart-of-gold.com" \
            type="result" \
@@ -44,6 +43,7 @@ test("1 Test EmberXmpp.Connection.createRecord()", function(){
         </query>\
       </iq>'
     ));
+    adapter.addResponse("");
 
     var connection = EmberXmpp.Connection.createRecord("host", 
                                                        "karsten@karsten-n",
@@ -56,13 +56,13 @@ test("1 Test EmberXmpp.Connection.createRecord()", function(){
     connection.connect();
 
     //Check if own presence and roster request were sent
+    equal(adapter.getLastStanzaXML(), 
+          '<presence xmlns="jabber:client"></presence>',
+          "Then the presence should have been sent.");
     equal(adapter.getLastStanzaXML(),
           '<iq type="get" xmlns="jabber:client"><query xmlns="jabber:iq:roster"></query></iq>',
            "The request for roster should have been sent last."
           );
-    equal(adapter.getLastStanzaXML(), 
-          '<presence xmlns="jabber:client"></presence>',
-          "Then the presence should have been sent.");
 
     ok(EmberXmpp.Connection.store.hasOwnProperty("karsten@karsten-n" + "_" + "host"),
           "We should have a connection model.");
@@ -125,6 +125,8 @@ module("EmberXmpp.Connection instance members.");
 
 test("1 Test that EmberXmpp.Connection.connect() is called on right instance", 
      function(){
+         expect(2);
+
          var connection1, connection2;
 
          connection1 = EmberXmpp.Connection.find("jid1", "host", "pw");
@@ -134,9 +136,15 @@ test("1 Test that EmberXmpp.Connection.connect() is called on right instance",
          //if callback is called only once
          connection1.reopen({
              onConnect: function(status){
-                ok();
+                ok(true, "onConnect is called for connection1.");
              }
          });
 
-         ok(false, "no test added.");
+         connection2.reopen({
+             onConnect: function(status){
+                ok(false, "onConnect is called for connection2 but should not.");
+             }
+         });
+
+        connection1.connect();
      });

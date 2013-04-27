@@ -95,6 +95,9 @@ test("3 Test onPresence callback.", function(){
     roster.onPresence({jid: "karsten@karsten-n", 
                        presence: { available: false} });
 
+    //onPresence with entity not in roster should not crash
+    roster.onPresence({jid: "notinroster"});
+
     ok(!roster.get('firstObject').get('online'),
        "Karsten should be offline now.");
 });

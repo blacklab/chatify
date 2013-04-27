@@ -21,7 +21,7 @@ Ember.Handlebars.registerBoundHelper('marked', function(markdown){
 });
 
 //Instance of XMPP Client. TODO: Move to different place
-var xmppClient = null;
+var xmppConnection = null;
 
 
 //----- Roster -----------------------------------------------------------------
@@ -32,10 +32,13 @@ App.RosterController = Ember.ObjectController.extend({
         this._super();
     },
     
-    //Property: returns true when roster was loaded.
+    /**
+     * Property: returns true when roster was loaded.
+     * Note: content.conten
+     */
     loadedRoster: function(){
-        return !(this.get('content').get('friends') == null);
-    }.property('content.friends')
+        return !(this.get('content.length') == null);
+    }.property('content.length')
 
 });
 
@@ -44,39 +47,11 @@ App.RosterView = Ember.View.extend({
 });
 
 //----- Login ------------------------------------------------------------------
-App.LoginIndexController = Ember.ObjectController.extend({
-   loggedIn: null,
-   
-   //needs: ['application', 'loginConnect'],
-   
-   init: function() {
-     this._super();
-     this.set('loggedIn', false);  
-   },
-   
-   setStatus: function(status){
-     this.set('loggedIn', status);  
-   },
-  
-   isLoggedIn: function() {
-      return this.get('loggedIn');
-   }
-});
-
 App.LoginConnectController = Ember.ObjectController.extend({
-    error: null,
-    //needs: "loginIndex",
-    //loginIndexBinding: "controllers.loginIndex",
+    //statusBinding: Ember.Binding.oneWay('xmppConnection.status'),
     
     init: function(){
         this._super();
-        this.set('error', null);
-        
-        $.subscribe('connected.client.im', _.bind(this._onConnected, this));  
-        
-        $.subscribe('error.client.im',  _.bind(this._onError, this));
-        $.subscribe('connfail.client.im',  _.bind(this._onError, this));
-        $.subscribe('authfail.client.im',  _.bind(this._onError, this));
     },
     
     //Action: can be called when an error occured and user wants to go back to
@@ -86,39 +61,14 @@ App.LoginConnectController = Ember.ObjectController.extend({
         this.set('error', null);
         this.transitionToRoute('login.index');
     },
-    
-    //Private callbacks
-    _onError: function(event, status){
-        this.set('error', "Error: " + status + " - " + event.type);
-        this.controllerFor('loginIndex').setStatus(false);
-    },
-    
-    _onConnected: function(){
-        this.set('error', null);
-        this.controllerFor('loginIndex').setStatus(true);
-        
-        console.log("Connected to XMPP server");
-        this.transitionToRoute('conversations.index');
-    }
-});
+/*
+    status: function(){
+        return xmppConnection.get('status');
+    }.property("xmppConnection.status"),*/
 
-App.LoginDisconnectController = Ember.ObjectController.extend({
-    //needs: "loginIndex",
-    //loginIndexBinding: "controllers.loginIndex",
-    
-    init: function(){
-        this._super();
-        $.subscribe('diconnected.client.im', _.bind(this._onDisconnected, this));  
-    },
-
-    
-    //Private callbacks
-    _onDisconnected: function(){
-        this.controllerFor('loginIndex').setStatus(false);
-        
-        console.log("Disconnected from XMPP server");
-        this.transitionToRoute('login.index');
-    }
+    error: function(){
+        return xmppConnection.get('status') != Strophe.CONNECTED;
+    }.property('xmppConnection.status')
 });
 
 //----- Application ------------------------------------------------------------
@@ -142,18 +92,10 @@ App.ApplicationController = Ember.Controller.extend({
     connectXMPPClient: function() {
         
         // XMPP client
-        xmppClient = new IM.Client({
-            jid: App.user.jid,
-            password: App.user.password,
-            host: CONFIG.host,
-            debug: this.debug
-        });
-        
-        xmppClient.connect(); 
-    },
-    
-    disconnectXMPPClient: function() {
-        xmppClient.disconnect(); 
+        xmppConnection = EmberXmpp.Connection.find(App.user.jid, 
+                                               CONFIG.host, 
+                                               App.user.password);        
+        xmppConnection.connect(); 
     }
     
 });
@@ -182,7 +124,6 @@ App.MessageTextAreaView = Ember.TextArea.extend({
                 var ctrl = this.get('controller');
                 console.log("Pressed enter:", ctrl);
                 ctrl.sendChat(message);
-                //App.router.applicationController.sendMessage(message);
             }
         }
 });
@@ -210,10 +151,12 @@ App.Router.map(function(){
 
 App.IndexRoute = Ember.Route.extend({
     redirect: function() {
-        if(this.controllerFor('loginIndex').isLoggedIn() == false){
-            this.transitionTo('login');
+        if(xmppConnection){
+            if(xmppConnection.get('isConnected')){
+                this.transitionTo('conversations.index');
+            }
         }else {
-            this.transitionTo('conversation');
+            this.transitionTo('login.index');
         }
         
     }
@@ -245,29 +188,58 @@ App.LoginIndexRoute = Ember.Route.extend({
 });
 
 App.LoginConnectRoute = Ember.Route.extend({
-    activate : function() {
+    activate: function() {
         this.controllerFor("application").connectXMPPClient();
+
+        //Observe xmppConnvetion.status. Transition once we are connected.
+        //Bind this route to callback so we can transition
+        xmppConnection.addObserver('status', this, function(){
+            //Are we connected yet?
+            if(xmppConnection.get('isConnected')){
+                this.transitionTo('conversations.index');
+            }
+        });
+    },
+
+    deactivate: function(){
+        //Remove observer again
+        xmppConnection.removeObserver('status', this, function(){
+            if(xmppConnection.get('isConnected')){
+                this.transitionTo('conversations.index');
+            }
+        });
     }
 });
 
 App.LoginDisconnectRoute = Ember.Route.extend({
    activate: function(){
-       this.controllerFor("application").disconnectXMPPClient();
-   } 
+       xmppConnection.disconnect();
+
+        //Observe xmppConnvetion.status. Transition once we are connected.
+        //Bind this route to callback so we can transition
+        xmppConnection.addObserver('status', this, function(){
+            if(xmppConnection.get('isDisconnected')){
+                this.transitionTo('login.index');
+            }
+        });
+   },
+
+   deactivate: function(){
+        xmppConnection.removeObserver('status', this, function(){
+            if(xmppConnection.get('isDisconnected')){
+                this.transitionTo('login.index');
+            }
+        });
+   }
 });
 
 App.ConversationsRoute = Ember.Route.extend({
 
     setupController: function(controller, model){
-        console.log("Setup controller in ConversationsRoute");
-
-        var roster = App.Roster.create();
-        //TODO: this might have to move somewhere else
-        roster._subscribe();
+        
+        //Set EmberXmpp.Roster as content
         this.controllerFor('roster')
-            .set('content', roster);
-
-        console.log("Found controller");
+            .set('content', xmppConnection.get('roster'));
     },
 
     renderTemplate: function() {
@@ -286,10 +258,6 @@ App.ConversationsIndexRoute = Ember.Route.extend({
     
     activate : function() {
         console.log("Enter conversation");
-        
-        var status = this.controllerFor('loginIndex').isLoggedIn();
-        
-        console.log("Loggedin: " + status);
     },
     
     renderTemplate: function() {

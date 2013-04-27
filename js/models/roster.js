@@ -3,6 +3,9 @@
 
 //Model
 
+
+
+/*
 App.Roster = Ember.Object.extend({
 
     init: function(){
@@ -96,4 +99,4 @@ App.Roster = App.Roster.reopenClass({
     find: function(id){
         console.log("Find is called for roster");
     },
-});
+});*/

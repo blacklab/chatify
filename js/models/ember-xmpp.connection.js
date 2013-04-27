@@ -4,7 +4,7 @@ EmberXmpp.Connection = Ember.Object.extend({
     host: null,
     jid: null,
     password: null,
-    connectionStatus: null,
+    status: null,
 
     roster: null,
 
@@ -25,17 +25,30 @@ EmberXmpp.Connection = Ember.Object.extend({
         this.get('xc').connect(_.bind(this.onConnect, this));
     },
 
+    disconnect: function(){
+        this.get('xc').Presence.sendUnavailable();
+        this.get('xc').disconnect();
+    },
+
+    isConnected: function(){
+        return this.get('status') == Strophe.Status.CONNECTED;
+    }.property('status'),
+    
+    isDisconnected: function(){
+        return this.get('status') == Strophe.Status.DISCONNECTED;
+    }.property('status'),
+
     //TODO: this callback might be on class base not instance. Check it!
     onConnect: function(status) {
         var xc = this.get('xc');
         console.log("Status: " + status);
    
-        this.set('connectionStatus', status);
+        this.set('status', status);
 
         if(status == Strophe.Status.CONNECTED){
             //Send own presence and request roster once we connected.
-            xc.Presence.send();
             xc.Roster.requestItems();
+            xc.Presence.send();
         }
 
         /*
@@ -104,7 +117,15 @@ EmberXmpp.Connection = EmberXmpp.Connection.reopenClass({
             connect: function(callback){
                 this.connection.connect(options.jid, 
                                         options.password, 
-                                        onConnect);
+                                        callback);
+            },
+
+            /**
+             * Disconnects client.
+             */
+            disconnect: function(){
+                this.connection.flush();
+                this.connection.disconnect();
             }
         });
 
@@ -144,6 +165,13 @@ EmberXmpp.Connection = EmberXmpp.Connection.reopenClass({
                  */
                 connect: function(callback){
                     this.connectionAdapter.connect(callback);
+                },
+
+                /**
+                 * Lets adapter discconect client.
+                 */
+                disconnect: function(){
+                    this.connectionAdapter.disconnect();
                 }
              }); 
 
@@ -162,12 +190,6 @@ EmberXmpp.Connection = EmberXmpp.Connection.reopenClass({
         //var conversation = connection.get('conversation');
         //xc.Chat.registerHandler('onMessage',
         //                        _.bind(conversation.onMessage, conversation));
-        
-        //Finally: connect!
-        //xc.connect(_.bind(connection.onConnect, connection));
-
-        //Add connection to store
-        //this.store[jid + "_" + host] = connection;
 
         return connection;
     },

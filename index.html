@@ -130,7 +130,7 @@
         {{#unless loadedRoster}}
             <li>Loading...</li>
         {{else}}
-            {{#each friend in controller.content.friends}}
+            {{#each friend in controller.content}}
             <li>
             {{#linkTo conversations/conversation friend}}
                 {{#if friend.online}}<i class="icon-fire"></i>{{/if}} {{friend.name}}
@@ -171,7 +171,7 @@
   </script>  
   
   <script type="text/x-handlebars" data-template-name="login/connect">
-    <div style="text-align:center;">Connecting...</div>
+      <div style="text-align:center;">Connecting... {{status}}</div>
     {{#if error}}
     <div class="alert alert-error">{{error}}</div>
     <div class="pull-right">
@@ -212,16 +212,22 @@
   <script src="js/libs/jquery.ba-tinypubsub.js"></script>
   <script src="js/libs/underscore-min.js"></script>
   <script src="js/libs/strophe-1.0.2.js"></script>
+  <script src="js/libs/xc.js"></script>
   <script src="js/libs/handlebars-1.0.0-rc.3.js"></script>
   <script src="js/libs/ember-1.0.0-rc.1.js"></script>
   <script src="js/libs/marked.js"></script>
-  
+
+  <!-- EmberXmpp -->
+  <script src="js/models/ember-xmpp.connection.js"></script>
+  <script src="js/models/ember-xmpp.entity.js"></script>
+  <script src="js/models/ember-xmpp.roster.js"></script>
+  <script src="js/models/ember-xmpp.conversation.js"></script>
+
   <!-- App related -->
   <script src="config.js"></script>
   <script src="js/client.js"></script>
   <script src="js/models/user.js"></script>
   <script src="js/models/conversation.js"></script>
-  <script src="js/models/roster.js"></script>
 
   <script src="js/controllers/conversation.js"></script>
   
