@@ -116,7 +116,7 @@ App.MessageTextAreaView = Ember.TextArea.extend({
             if (event.which === 13 && !event.shiftKey) {
                 event.preventDefault();
     
-                var message = {body: this.get('value'), from: App.user.jid};
+                var message = this.get('value');
                                                            
                 this.set('value', '');
            
@@ -279,8 +279,8 @@ App.ConversationsConversationRoute = Ember.Route.extend({
     
     setupController: function(controller, model) {
 
-        //model is of type user. Find conversation...
-        conv = App.Conversation.find(model.get('id'));
+        //model is of type EmberXmpp.Entity. Find conversation...
+        conv = xmppConnection.findConversation(model.get('id'));
         controller.set("content", conv);
     },
     
@@ -290,9 +290,5 @@ App.ConversationsConversationRoute = Ember.Route.extend({
         });
     }
 });
-
-//init XMPPBindings
-//TODO: move this to a nicer place
-App.Conversation.subscribe();
 
 App.initialize();

@@ -87,7 +87,7 @@ EmberXmpp.Connection = Ember.Object.extend({
      * @param {XC.MessageStanza} message
      */
     onMessage: function(message){
-        var conv = this.get('conversations').get(message.from.getBareJID());
+        var conv = this.findConversation(message.from.getBareJID());
 
         if(conv){
             conv.onMessage(message);

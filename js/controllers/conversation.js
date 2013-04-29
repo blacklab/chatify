@@ -12,7 +12,7 @@ App.ConversationsConversationController = Ember.ObjectController.extend({
      */
     allTracks: function(){
         var tracks = Em.A();
-        this.get('messages').forEach(function(msg, index, enumerable){
+        this.get('content').forEach(function(msg, index, enumerable){
             console.log("Add tracks: ", msg.tracks);
             tracks.pushObjects(msg.tracks);
         });

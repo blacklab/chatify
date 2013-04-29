@@ -51,6 +51,7 @@ test("3 onMessage callback.", function(){
                     body: "",
                     to: XC.Entity.extend({jid:"roman@karsten-n"})
                   });
+    conv.onMessage({});
     equal(conv.get('content').length,
          0,
          "The message should not have been added.");

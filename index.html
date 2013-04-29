@@ -100,10 +100,10 @@
 
     {{view App.PlaylistView}}
 
-    {{#each message in controller.messages}}
+    {{#each message in controller.content}}
     <div class="well">
-        <p>From: {{message.from}}</p>
-        <p>To: {{message.to}}</p>
+        <p>From: {{message.from.jid}}</p>
+        <p>To: {{message.to.jid}}</p>
         <p>{{marked message.body}}</p>
         <p>
             {{#each track_uri in message.tracks}}
@@ -225,9 +225,7 @@
 
   <!-- App related -->
   <script src="config.js"></script>
-  <script src="js/client.js"></script>
   <script src="js/models/user.js"></script>
-  <script src="js/models/conversation.js"></script>
 
   <script src="js/controllers/conversation.js"></script>
   

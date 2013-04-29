@@ -15,6 +15,9 @@ EmberXmpp.Conversation = Ember.ArrayProxy.extend({
 
         if(entity){
             entity.sendChat(body);
+
+            //Add message to conversation
+            this.get('content').pushObject({body: body});
         }
     },
 
@@ -24,6 +27,7 @@ EmberXmpp.Conversation = Ember.ArrayProxy.extend({
      * @param {XC.MessageStanza} message
      */
     onMessage: function(message){
+        if(!message.body) return;
         if(message.body === "") return;
 
         //TODO: extract tracks
