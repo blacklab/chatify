@@ -1,4 +1,4 @@
-//Test EmberXmpp.Connection
+//Test EmberXmpp.Connectio
 
 var adapter =  null;
 
@@ -21,7 +21,8 @@ module("EmberXmpp.Connection model static members",{
         });
     },
 
-    teardown: function(){}
+    teardown: function(){
+    }
 });
 
 test("1 Test EmberXmpp.Connection.createRecord()", function(){
@@ -45,8 +46,8 @@ test("1 Test EmberXmpp.Connection.createRecord()", function(){
     ));
     adapter.addResponse("");
 
-    var connection = EmberXmpp.Connection.createRecord("host", 
-                                                       "karsten@karsten-n",
+    var connection = EmberXmpp.Connection.createRecord("karsten@karsten-n",
+                                                       "host",
                                                        "secret password");
     
     //EmberXmpp.find() usually adds to store
@@ -121,7 +122,27 @@ test("2 Test EmberXmpp.Connection.find()", function(){
           "two different jid-host combinations.");
 });
 
-module("EmberXmpp.Connection instance members.");
+module("EmberXmpp.Connection instance members.", {
+    setup: function(){
+
+        adapter = XC.Test.MockConnection.extend({
+                    connect: function(callback){
+                        ok(true, "connect is called on adapter");
+
+                        callback(Strophe.Status.CONNECTED);
+                    }
+                  }).init();
+    
+        //Change getConnectionAdapter function
+        EmberXmpp.Connection.reopenClass({
+            getConnectionAdapter: function(options, onConnect){
+                return adapter;
+            }
+        });
+    },
+
+    teardown: function(){}
+});
 
 test("1 Test that EmberXmpp.Connection.connect() is called on right instance", 
      function(){
@@ -148,3 +169,98 @@ test("1 Test that EmberXmpp.Connection.connect() is called on right instance",
 
         connection1.connect();
      });
+
+test("2 Test findConversation", function(){
+    expect(2);
+
+    var conn = EmberXmpp.Connection.createRecord("karsten@karsten-n", 
+                                                 "host", 
+                                                 "pw");
+
+    //Add entity to roster otherwise it won't be found
+    var entities = [XC.Entity.extend({
+                        jid: "roman@karsten-n/1234",
+                        presence: {
+                            available: true
+                        }
+                    })];
+
+    var roster = conn.get('roster');
+    roster.onRosterItems(entities);
+
+    var conv = conn.findConversation("roman@karsten-n");
+
+    ok(conn.get('conversations').has("roman@karsten-n"),
+       "Connection should have one conversation.");
+
+    deepEqual(conv,
+              conn.get('conversations').get("roman@karsten-n"),
+              "The conversation we retrieved and the one stored should be the same.");
+
+    delete conn;
+    delete entity;
+    delete xcEntity;
+    delete conv;
+});
+
+test("3 Test onMessage", function(){
+    expect(2);
+
+    var conn = EmberXmpp.Connection.find("karsten@karsten-n", "host", "pw");
+
+    //Add entity to roster otherwise it won't be found
+    var entities = [XC.Entity.extend({
+                        jid: "roman@karsten-n/1234",
+                        presence: {
+                            available: true
+                        }
+                    })];
+
+    var roster = conn.get('roster');
+    roster.onRosterItems(entities);
+
+    var conv = conn.findConversation("roman@karsten-n");
+
+    var msg = {from: entities[0], body: "one nice body"};
+
+    conn.onMessage(msg);
+
+    equal(conv.get('length'),
+          1,
+          "One message should have been added to conversation.");
+
+    deepEqual(conv.get('firstObject'),
+              msg,
+              "The messge should be equal to the one we send.");
+});
+
+test("4 Test that onMessage is registered and works", function(){
+    expect(1);
+
+    var conn = EmberXmpp.Connection.find("karsten@karsten-n", "host", "pw");
+    
+    //Add entity to roster otherwise it won't be found
+    var entities = [XC.Entity.extend({
+                        jid: "roman@karsten-n/1234",
+                        presence: {
+                            available: true
+                        }
+                    })];
+
+    var roster = conn.get('roster');
+    roster.onRosterItems(entities);
+
+    var conv = conn.findConversation("roman@karsten-n");
+    
+    //Create message
+    var xml = '<message to="karsten@karsten-n" from="roman@karsten-n" type="chat">'
+                + '<body>dont cry for me, Im already dead</body>'
+            + '</message>'
+    var msg = XC.Test.Packet.extendWithXML(xml);
+
+    adapter.fireEvent('message', msg);
+
+    equal(conv.get('content').length,
+          1,
+          "We should have the new message.");
+});

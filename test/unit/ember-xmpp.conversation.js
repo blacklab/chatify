@@ -1,55 +1,93 @@
 //Test for EmberXmpp.Conversation model
 
-module("EmberXmpp.Conversation model static members");
+module("EmberXmpp.Conversation model members",{
+    setup: function(){
+        conn = XC.Test.MockConnection.extend().init();
+        var xc = XC.Connection.extend({connectionAdapter: conn});
 
-test("1 Test if App.Conversation.store does not include anything at start.", 
+        var xcEntity =  xc.Entity.extend({
+          jid: "karsten@karsten-n/1234",
+          presence: {
+              available: true
+              }
+          });
+
+        entity = EmberXmpp.Entity.create({xcEntity: xcEntity});
+    },
+
+    teardown: function(){
+        delete conn;
+        delete entity;
+    }
+});
+
+test("1 Test if EmberXmpp.Conversation.create() adds an empty array to content.", 
      function(){
-        expect(1);
+        expect(2);
 
-        ok(!EmberXmpp.Conversation.store.hasOwnProperty("someid"), 
-           "We expect App.Conversation.store to have no item");
+        var conv = EmberXmpp.Conversation.create({withJID: "karsten@karsten-n"});
+
+        ok(conv.get('content'), 
+           "We expect content of conversation to be an array.");
+
+        equal(conv.get('withJID'),
+              "karsten@karsten-n",
+              "Conversation has a withJID property.");
+
+        delete conv;
 });
 
-test("2 Test if App.Converstion.find adds to store.", function(){
-    expect(1);
-
-    var conv = EmberXmpp.Conversation.find("someid");  
-
-    ok(EmberXmpp.Conversation.store.hasOwnProperty("someid"), 
-       "We expect App.Conversation.store to have one item with key 'someid'");
-});
-
-module("EmberXmpp.Conversation model non-static members", {
-    setup: function(){},
-
-    teardown: function(){}
-});
-
-test("1 onMessage callback.", function(){
+test("3 onMessage callback.", function(){
     expect(5);
 
-    var conv = EmberXmpp.Conversation.find("roman@karsten-n");
+    var conv = EmberXmpp.Conversation.create("roman@karsten-n");
 
     equal(conv.get('content').length,
          0,
          "The conversation should have no messages at the start.");
 
     //Message without body should not be added
-    conv.onMessage({body: ""});
+    conv.onMessage({
+                    body: "",
+                    to: XC.Entity.extend({jid:"roman@karsten-n"})
+                  });
     equal(conv.get('content').length,
          0,
          "The message should not have been added.");
 
-    conv.onMessage({body: "Some body"});
+    conv.onMessage({
+                    body: "Some body",
+                    to: XC.Entity.extend({jid:"roman@karsten-n"})
+                  });
     equal(conv.get('content').length,
          1,
          "The message should have been added.");
     deepEqual(conv.get('firstObject'),
-             {body: "Some body"},
+             {body: "Some body", 
+              to: XC.Entity.extend({jid: "roman@karsten-n"}),
+              tracks: []},
              "The conversation should hold our messages.");
 
-    secondConv = EmberXmpp.Conversation.find("anotherid");
+    secondConv = EmberXmpp.Conversation.create("anotherid");
     equal(secondConv.get('content').length,
           0,
           "Another conversation should not be affected by onMessage callback,");
+
+    delete conv;
+    delete secondConv;
+});
+
+test("4 sendChat", function(){
+    expect(1);
+    var conv = EmberXmpp.Conversation.create({entity: entity});
+
+    conv.sendChat("Another beautiful body of text");
+
+    var xml = $($.parseXML(conn.getLastStanzaXML()));
+
+    equal(xml.find("body").text(),
+          "Another beautiful body of text",
+          "The last stanza should have a text field.");
+    
+    delete conv;
 });

@@ -2,6 +2,7 @@
 
 EmberXmpp.Conversation = Ember.ArrayProxy.extend({
     content: null,
+    entity: null, //EmberXmpp.Entity The user the conversation is with
 
     init: function(){
         this._super();
@@ -9,25 +10,25 @@ EmberXmpp.Conversation = Ember.ArrayProxy.extend({
         this.set('content', Em.A());
     },
 
-    //Callback
-    onMessage: function(message){
+    sendChat: function(body){
+        var entity = this.get('entity');
 
+        if(entity){
+            entity.sendChat(body);
+        }
+    },
+
+    /**
+     * Message handler
+     *
+     * @param {XC.MessageStanza} message
+     */
+    onMessage: function(message){
         if(message.body === "") return;
 
+        //TODO: extract tracks
+        message.tracks = Em.A();
+        
         this.get('content').pushObject(message);
-    }
-});
-
-//Static members
-
-EmberXmpp.Conversation = EmberXmpp.Conversation.reopenClass({
-    store: {},
-
-    find: function(id){
-
-        if(!this.store[id]){
-            this.store[id] = EmberXmpp.Conversation.create();
-        }
-        return this.store[id];
     }
 });

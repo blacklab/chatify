@@ -27,13 +27,23 @@ EmberXmpp.Roster = Ember.ArrayProxy.extend({
     },
 
     /**
+     * Looks up the contact.
+     *
+     * @param {String} bareJID The bare JID of the contact.
+     * @return {EmberXmpp.Entity} undefined if not contact found or the contact
+     */
+    getContact: function(bareJID){
+        return this.findProperty('jid', bareJID);
+    },
+
+    /**
      * @param {XC.Entity} entity A friend who changed her presence.
      */
     onPresence: function(entity){
         var contact, bareJID;
 
         bareJID = XC.Entity.extend({jid: entity.jid}).getBareJID();
-        contact = this.findProperty('jid', bareJID);
+        contact = this.getContact(bareJID);
 
         if(contact){
             contact.set('presence', entity.presence);

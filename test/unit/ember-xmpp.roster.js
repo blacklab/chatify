@@ -101,3 +101,30 @@ test("3 Test onPresence callback.", function(){
     ok(!roster.get('firstObject').get('online'),
        "Karsten should be offline now.");
 });
+
+test("3 Test getContact", function(){
+    expect(1);
+
+    //Add some entities
+    var entities = [XC.Entity.extend({
+                        jid: "karsten@karsten-n/1234",
+                        presence: {
+                            available: true
+                        }
+                    }),
+                    XC.Entity.extend({
+                        jid: "roman@karsten-n/1234",
+                        presence: {
+                            available: true
+                        }
+                    })];
+
+    var roster = EmberXmpp.Roster.create();
+    roster.onRosterItems(entities);
+
+    var contact = roster.getContact("karsten@karsten-n");
+
+    deepEqual(contact,
+              roster.get('firstObject'),
+              "The contact we retrieved should be the first contact in roster.");
+});

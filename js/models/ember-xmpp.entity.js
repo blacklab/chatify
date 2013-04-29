@@ -12,6 +12,10 @@ EmberXmpp.Entity = Ember.Object.extend({
         return this.get('xcEntity').getBareJID();
     }.property('xcEntity'),
 
+    id: function(){
+        return this.get('jid');
+    }.property('jid'),
+
     //TODO: dependency should go down deeper than just xcEntity
     //Node is seen as username/name
     name: function(){

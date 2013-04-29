@@ -18,7 +18,8 @@ module("EmberXmpp.Entity model non-static members", {
         entity = EmberXmpp.Entity.create({xcEntity: xcEntity});
     },
 
-    teardown: function(){}
+    teardown: function(){
+    }
 });
 
 test("1 Test name property.", function(){
@@ -80,4 +81,11 @@ test("5 Test sendChat.", function(){
     equal(xml.find("subject").text(),
           "subject",
           "The message should have a subject,");
+});
+
+test("6 Test id property.", function(){
+    expect(1);
+    equal(entity.get('id'), 
+         "karsten@karsten-n", 
+         "Friend's id should be his jid.");
 });

@@ -6,7 +6,8 @@ EmberXmpp.Connection = Ember.Object.extend({
     password: null,
     status: null,
 
-    roster: null,
+    roster: null, //Ember.Array
+    conversations: null, //Ember.Map
 
     //TODO: should this be global?
     xc: null,
@@ -15,10 +16,34 @@ EmberXmpp.Connection = Ember.Object.extend({
         this._super();
 
         this.set('roster', EmberXmpp.Roster.create());
+        this.set('conversations', Ember.Map.create());
     },
 
     getRoster: function(){
         return this.get('roster');
+    },
+
+    /**
+     * Looks for the conversation with a user. If no conversation is found a 
+     * new is created.
+     *
+     * @param {String} bareJID The bare jid of the user the conversations is with.
+     * @return {EmberXmpp.Conversation} A conversation if contact exists in roster.
+     */
+    findConversation: function(bareJID){
+        var conversations = this.get('conversations');
+
+        if(!conversations.has(bareJID)){
+            var entity = this.get('roster').getContact(bareJID);
+
+            if(!entity) return;
+
+            conversations.set(bareJID, 
+                              EmberXmpp.Conversation.create({entity: entity})
+                             );
+        }
+
+        return conversations.get(bareJID);
     },
 
     connect: function(){
@@ -30,6 +55,8 @@ EmberXmpp.Connection = Ember.Object.extend({
         this.get('xc').disconnect();
     },
 
+    //Properties -------------------------------------------------------------
+
     isConnected: function(){
         return this.get('status') == Strophe.Status.CONNECTED;
     }.property('status'),
@@ -38,7 +65,9 @@ EmberXmpp.Connection = Ember.Object.extend({
         return this.get('status') == Strophe.Status.DISCONNECTED;
     }.property('status'),
 
-    //TODO: this callback might be on class base not instance. Check it!
+    //Callbacks --------------------------------------------------------------
+
+    //TODO: get status message as second parameter
     onConnect: function(status) {
         var xc = this.get('xc');
         console.log("Status: " + status);
@@ -50,43 +79,20 @@ EmberXmpp.Connection = Ember.Object.extend({
             xc.Roster.requestItems();
             xc.Presence.send();
         }
-
-        /*
-        var Status = Strophe.Status;
-
-        switch (status) {
-        case Status.ERROR:
-            $.publish('error.client.im', status);
-            break;
-        case Status.CONNECTING:
-            $.publish('connecting.client.im', status);
-            break;
-        case Status.CONNFAIL:
-            $.publish('connfail.client.im', status);
-            break;
-        case Status.AUTHENTICATING:
-            $.publish('authenticating.client.im', status);
-            break;
-        case Status.AUTHFAIL:
-            $.publish('authfail.client.im', status);
-            break;
-        case Status.CONNECTED:
-            this._onConnected();
-            $.publish('connected.client.im', status);
-            break;
-        case Status.DISCONNECTING:
-            $.publish('diconnecting.client.im', status);
-            break;
-        case Status.DISCONNECTED:
-            $.publish('diconnected.client.im', status);
-            break;
-        case Status.ATTACHED:
-            $.publish('attached.client.im', status);
-            break;
-        }
-
-        return true;*/
     },
+
+    /**
+     * Callback for XC.Chat service
+     *
+     * @param {XC.MessageStanza} message
+     */
+    onMessage: function(message){
+        var conv = this.get('conversations').get(message.from.getBareJID());
+
+        if(conv){
+            conv.onMessage(message);
+        }
+    }
 });
 
 
@@ -180,16 +186,10 @@ EmberXmpp.Connection = EmberXmpp.Connection.reopenClass({
         
         //Register handlers
         roster = connection.get('roster');
-        xc.Presence.registerHandler('onPresence', 
-                                    _.bind(roster.onPresence, roster));
+        xc.Presence.registerHandler('onPresence', roster.onPresence, roster);
+        xc.Roster.registerHandler('onRosterItems', roster.onRosterItems, roster);
 
-        xc.Roster.registerHandler('onRosterItems', 
-                                  _.bind(roster.onRosterItems, roster));
-
-        //TODO: listen on messages
-        //var conversation = connection.get('conversation');
-        //xc.Chat.registerHandler('onMessage',
-        //                        _.bind(conversation.onMessage, conversation));
+        xc.Chat.registerHandler('onMessage', connection.onMessage, connection);
 
         return connection;
     },
