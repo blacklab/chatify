@@ -68,9 +68,9 @@ test("4 Test online property.", function(){
 });
 
 test("5 Test sendChat.", function(){
-    expect(2);
+    expect(3);
 
-    entity.sendChat("A beautiful body of text", "subject");
+    var xcMsg = entity.sendChat("A beautiful body of text", "subject");
 
     xml = $($.parseXML(conn.getLastStanzaXML()));
 
@@ -81,6 +81,10 @@ test("5 Test sendChat.", function(){
     equal(xml.find("subject").text(),
           "subject",
           "The message should have a subject,");
+
+    equal(xcMsg.to.jid,
+          "karsten@karsten-n/1234",
+          "We expect sendChat to return a message.");
 });
 
 test("6 Test id property.", function(){

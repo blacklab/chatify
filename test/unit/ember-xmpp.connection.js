@@ -204,7 +204,7 @@ test("2 Test findConversation", function(){
 });
 
 test("3 Test onMessage", function(){
-    expect(2);
+    expect(3);
 
     var conn = EmberXmpp.Connection.find("karsten@karsten-n", "host", "pw");
 
@@ -229,9 +229,12 @@ test("3 Test onMessage", function(){
           1,
           "One message should have been added to conversation.");
 
-    deepEqual(conv.get('firstObject'),
-              msg,
-              "The messge should be equal to the one we send.");
+    equal(conv.get('firstObject').get('body'),
+          "one nice body",
+          "The messge should have pur body.");
+    equal(conv.get('firstObject').get('from'),
+          msg.from.jid,
+          "The message should hold its sender.");
 });
 
 test("4 Test that onMessage is registered and works", function(){

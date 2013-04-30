@@ -102,8 +102,8 @@
 
     {{#each message in controller.content}}
     <div class="well">
-        <p>From: {{message.from.jid}}</p>
-        <p>To: {{message.to.jid}}</p>
+        <p>From: {{message.from}}</p>
+        <p>To: {{message.to}}</p>
         <p>{{marked message.body}}</p>
         <p>
             {{#each track_uri in message.tracks}}
@@ -221,6 +221,7 @@
   <script src="js/models/ember-xmpp.connection.js"></script>
   <script src="js/models/ember-xmpp.entity.js"></script>
   <script src="js/models/ember-xmpp.roster.js"></script>
+  <script src="js/models/ember-xmpp.message.js"></script>
   <script src="js/models/ember-xmpp.conversation.js"></script>
 
   <!-- App related -->

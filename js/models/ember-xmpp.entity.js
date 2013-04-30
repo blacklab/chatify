@@ -50,6 +50,6 @@ EmberXmpp.Entity = Ember.Object.extend({
     }.property('presence'),
 
     sendChat: function(body, subject, thread, id){
-        this.get('xcEntity').sendChat(body, subject, thread, id);
+        return this.get('xcEntity').sendChat(body, subject, thread, id);
     }
 });

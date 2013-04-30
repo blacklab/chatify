@@ -39,7 +39,7 @@ EmberXmpp.Connection = Ember.Object.extend({
             if(!entity) return;
 
             conversations.set(bareJID, 
-                              EmberXmpp.Conversation.create({entity: entity})
+                              EmberXmpp.Conversation.create({to: entity})
                              );
         }
 
@@ -97,7 +97,7 @@ EmberXmpp.Connection = Ember.Object.extend({
 
 
 //Static members
-EmberXmpp.Connection = EmberXmpp.Connection.reopenClass({
+EmberXmpp.Connection.reopenClass({
     store: {},
 
     /**

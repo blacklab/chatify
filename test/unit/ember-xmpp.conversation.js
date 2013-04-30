@@ -38,7 +38,7 @@ test("1 Test if EmberXmpp.Conversation.create() adds an empty array to content."
 });
 
 test("3 onMessage callback.", function(){
-    expect(5);
+    expect(6);
 
     var conv = EmberXmpp.Conversation.create("roman@karsten-n");
 
@@ -52,7 +52,7 @@ test("3 onMessage callback.", function(){
                     to: XC.Entity.extend({jid:"roman@karsten-n"})
                   });
     conv.onMessage({});
-    equal(conv.get('content').length,
+    equal(conv.get('length'),
          0,
          "The message should not have been added.");
 
@@ -60,17 +60,19 @@ test("3 onMessage callback.", function(){
                     body: "Some body",
                     to: XC.Entity.extend({jid:"roman@karsten-n"})
                   });
-    equal(conv.get('content').length,
+    equal(conv.get('length'),
          1,
          "The message should have been added.");
-    deepEqual(conv.get('firstObject'),
-             {body: "Some body", 
-              to: XC.Entity.extend({jid: "roman@karsten-n"}),
-              tracks: []},
-             "The conversation should hold our messages.");
+    equal(conv.get('firstObject').get('body'),
+          "Some body",
+          "Conversations should hold a message with our body.");
+    equal(conv.get('firstObject').get('to'),
+          "roman@karsten-n",
+          "The message in conversation should be address to Roman.");
 
+    //A different conversation should have no messages.
     secondConv = EmberXmpp.Conversation.create("anotherid");
-    equal(secondConv.get('content').length,
+    equal(secondConv.get('length'),
           0,
           "Another conversation should not be affected by onMessage callback,");
 
@@ -79,8 +81,8 @@ test("3 onMessage callback.", function(){
 });
 
 test("4 sendChat", function(){
-    expect(1);
-    var conv = EmberXmpp.Conversation.create({entity: entity});
+    expect(3);
+    var conv = EmberXmpp.Conversation.create({to: entity});
 
     conv.sendChat("Another beautiful body of text");
 
@@ -89,6 +91,15 @@ test("4 sendChat", function(){
     equal(xml.find("body").text(),
           "Another beautiful body of text",
           "The last stanza should have a text field.");
-    
+
+    //Check if conversation added mesage
+    equal(conv.get('length'),
+          1,
+          "The sent message should have been added to conversation.");
+
+    deepEqual(conv.get('firstObject').get('body'),
+              "Another beautiful body of text",
+              "The message should have a body.")
+
     delete conv;
 });
