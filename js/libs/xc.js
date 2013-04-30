@@ -1816,6 +1816,7 @@ XC.Mixin.Chat = XC.Base.extend(/** @lends XC.Mixin.Chat# */{
                 subject: subject,
                 thread: thread,
                 to: this,
+				from: this.connection.Entity.extend({jid: this.connection.getJID()}),
                 id: id
               });
 	msg.send();
