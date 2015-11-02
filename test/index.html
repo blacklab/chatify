@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Chatify - QUnit Tests</title>
+  <link rel="stylesheet" href="/test/vendor/qunit.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <script src="/test/vendor/qunit.js"></script>
+
+  <!-- load libraries -->
+  <script src="/js/libs/jquery-1.8.3.js"></script>
+  <script src="/js/libs/jquery.ba-tinypubsub.js"></script>
+  <script src="/test/vendor/underscore.js"></script>
+  <script src="/js/libs/strophe-1.0.2.js"></script>
+  <script src="/js/libs/handlebars-1.0.0-rc.3.js"></script>
+  <script src="/js/libs/ember-1.0.0-rc.1.js"></script>
+  <script src="/js/libs/xc.js"></script>
+  
+  <script src="/test/vendor/xc.test.js"></script>
+
+  <!-- Load app modules -->
+  <script>
+      
+    //Basic config
+    var CONFIG = {
+                host: "http://localhost:5280/http-bind/"
+            };
+
+    var xmppClient = null;
+
+    //Just create Ember App for testing
+    var App = Ember.Application.create({
+        autoinit: false,
+        LOG_TRANSITIONS: true
+    });
+
+    App.ApplicationController = Ember.Controller.extend({
+        debug: true,
+        
+        //Constructor
+        init : function(){
+            this._super();
+        },
+
+        //Public functions
+        connectXMPPClient: function() {
+        
+            // XMPP client
+            xmmpClient = new IM.Client({
+                jid: App.user.jid,
+                password: App.user.password,
+                host: CONFIG.host,
+                debug: true
+            });
+        
+            xmppClient.connect(); 
+        },
+    
+        disconnectXMPPClient: function() {
+            xmppClient.disconnect(); 
+        }
+    
+    });
+
+    //TODO move this
+    App.user = Ember.Object.create({
+        jid: 'karsten@karsten-n',
+        password: 'chatify',
+    });
+</script>
+
+  <!--EmberXmpp Models -->
+  <script src="/js/models/ember-xmpp.connection.js"></script>
+  <script src="/js/models/ember-xmpp.entity.js"></script>
+  <script src="/js/models/ember-xmpp.roster.js"></script>
+  <script src="/js/models/ember-xmpp.conversation.js"></script>
+  <script src="/js/models/ember-xmpp.message.js"></script>
+
+  <!-- Models -->
+  <script src="/js/models/user.js"></script>
+
+  <script src="/js/controllers/conversation.js"></script>
+
+  <!-- Load tests -->
+  <script src="/test/unit/user.js"></script>
+  <script src="/test/unit/playlist.js"></script>
+
+  <script src="/test/unit/ember-xmpp.entity.js"></script>
+  <script src="/test/unit/ember-xmpp.roster.js"></script>
+  <script src="/test/unit/ember-xmpp.conversation.js"></script>
+  <script src="/test/unit/ember-xmpp.message.js"></script>
+  <script src="/test/unit/ember-xmpp.connection.js"></script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!doctype html>
+<!--[if lt IE 7 ]> <html lang="en" class="ie6"> <![endif]--> <!--[if IE 7 ]>    <html lang="en" class="ie7"> <![endif]--> <!--[if IE 8 ]>    <html lang="en" class="ie8"> <![endif]--> <!--[if IE 9 ]>    <html lang="en" class="ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title></title>
+  <meta name="description" content="">
+  <meta name="author" content="Karsten Jeschkies">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+  <!-- Le styles -->
+  <link rel='stylesheet'
+        href='http://fonts.googleapis.com/css?family=Maven+Pro:400,500' 
+        type='text/css'>
+  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <!--<link rel="stylesheet" href="css/font-awesome.min.css"> @font-face is disabled-->
+  <style type="text/css">
+      body {
+        padding-top: 20px;
+        padding-bottom: 40px;
+      }
+
+      /* Custom container */
+      .container-narrow {
+        margin: 0 auto;
+        max-width: 900px;
+      }
+      .container-narrow > hr {
+        margin: 30px 0;
+      }
+
+      /* Main marketing message and sign up button */
+      .jumbotron {
+        margin: 60px 0;
+        text-align: center;
+      }
+      .jumbotron h1 {
+        font-size: 72px;
+        line-height: 1;
+      }
+      .jumbotron .btn {
+        font-size: 21px;
+        padding: 14px 24px;
+      }
+      
+      .message-text-area {
+        -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+        -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+        box-sizing: border-box;         /* Opera/IE 8+ */   
+        width: 100%; 
+        height: 5em;      
+      }
+      
+      .ember-view .active  {
+        color: red;
+      }
+  </style>
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  
+  <!-- templates -->
+  
+  <script type="text/x-handlebars" data-template-name="conversations">
+        <div class="span9" style="margin-left: 0;">
+
+          {{outlet conversation}}
+
+        </div>
+        
+        <!-- sidebar -->
+        <div class="span3">
+            <div class="well" style="padding: 9px">
+            <p class="pull-right">{{#linkTo login.disconnect}}Logout{{/linkTo}}</p>
+            {{outlet roster}}
+        </div>
+        </div>
+ </script>
+
+<script type="text/x-handlebars" data-template-name="conversations/index">
+      <p>You have no conversation selected</p>
+</script>
+
+<script type="text/x-handlebars" data-template-name="playlist">
+
+    <div style="position: fixed; left: 10px;">
+        {{uglyplayer controller.allTracks}}
+    </div>
+  </script>
+  
+  <script type="text/x-handlebars" data-template-name="conversations/conversation">
+
+    {{view App.PlaylistView}}
+
+    {{#each message in controller.messages}}
+    <div class="well">
+        <p>From: {{message.from}}</p>
+        <p>To: {{message.to}}</p>
+        <p>{{message.body}}</p>
+        <p>
+            {{#each track_uri in message.tracks}}
+                <iframe src="https://embed.spotify.com/?uri={{track_uri}}" 
+                    width="630" 
+                    height="80" 
+                    frameborder="0" 
+                    allowtransparency="true">
+                </iframe>
+           {{/each}}
+        </p>
+    </div>
+    {{/each}}
+
+    <hr>
+
+    {{view App.MessageTextAreaView}}
+
+  </script>
+  
+  <script type="text/x-handlebars" data-template-name="roster">
+      <ul class="nav nav-list">
+        <li class="nav-header">Friends</li>
+        {{#unless loadedRoster}}
+            <li>Loading...</li>
+        {{else}}
+            {{#each friend in controller.content.friends}}
+            <li>
+            {{#linkTo conversations/conversation friend}}
+                {{#if friend.online}}<i class="icon-fire"></i>{{/if}} {{friend.name}}
+            {{/linkTo}}     
+            </li>
+            {{/each}}
+        {{/unless}}
+    </ul>
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="login">
+      <div class="span6 offset3">
+        {{outlet}}
+      </div> 
+  </script> 
+  
+  <script type="text/x-handlebars" data-template-name="login/index">
+    <form class="form-horizontal">
+            <div class="control-group">
+                <label class="control-label">JID</label>
+                <div class="controls">
+                    {{view Ember.TextField class="input-xlarge" valueBinding="App.user.jid"}}
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">Password</label>
+                <div class="controls">
+                    {{view Ember.TextField class="input-xlarge" valueBinding="App.user.password" type="password"}}
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="controls">
+                    {{#linkTo login.connect classNames="btn"}}Login{{/linkTo}}
+                </div>
+            </div>
+        </form>
+  </script>  
+  
+  <script type="text/x-handlebars" data-template-name="login/connect">
+    <div style="text-align:center;">Connecting...</div>
+    {{#if error}}
+    <div class="alert alert-error">{{error}}</div>
+    <div class="pull-right">
+        <button {{action "backToLogin"}} class="btn">Back to Login</button>
+    </div>
+    
+    {{/if}}
+  </script>
+  
+  <script type="text/x-handlebars" data-template-name="login/disconnect">
+    <div style="text-align:center;">Disconnecting...</div>
+  </script>
+  
+</head>
+<body>
+  <script type="text/x-handlebars" data-template-name="application">
+    <div class="container-fluid" style="margin: 0 auto; max-width: 900px;">
+        
+      <div class="row-fluid" >
+          {{outlet}}
+      </div>
+      
+      <hr />
+
+      <div class="footer">
+        <p>&copy; Black Magic Laboratories 2013</p>
+        <p><small><a href="http://glyphicons.com">Glyphicons Free</a> licensed under <a href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</small></p>
+      </div>
+
+    </div> <!-- /container -->
+  </script>
+
+  <!-- Le javascript -->
+  <!-- The missing protocol means that it will match the current protocol, 
+       either http or https. If running locally, we use the local jQuery. -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+  <script>window.jQuery || document.write('<script src="js/libs/jquery-1.8.3.js"><\/script>')</script>
+  <script src="js/libs/jquery.ba-tinypubsub.js"></script>
+  <script src="js/libs/underscore-min.js"></script>
+  <script src="js/libs/strophe-1.0.2.js"></script>
+  <script src="js/libs/handlebars-1.0.0-rc.3.js"></script>
+  <script src="js/libs/ember-1.0.0-rc.1.js"></script>
+  
+  <!-- App related -->
+  <script src="config_deploy.js"></script>
+  <script src="js/client.js"></script>
+  <script src="js/models/user.js"></script>
+  <script src="js/models/conversation.js"></script>
+  <script src="js/models/roster.js"></script>
+
+  <script src="js/controllers/conversation.js"></script>
+  
+  <script src="js/views/playlist.js"></script>
+  
+  <script src="js/app.js"></script>
+</body>
+</html>
